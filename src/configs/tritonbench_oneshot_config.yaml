@@ -1,5 +1,5 @@
 # LLM model
-api_key: "wisemodel-xxvqzbsnecjtoxufxodx"
+api_key: ""
 model_id: "Kimi-K2-Instruct"
 temperature: 1.0
 
@@ -14,9 +14,9 @@ perf_ref_folder: null
 py_interpreter: "python"
 
 # configs for resuming optimization process
-result_path: null
-mem_file: null
-start_iter: 0
+# result_path: null
+# mem_file: null
+# start_iter: 0
 
 # target_kernels: ["flash_decode2_phi.py", 'cosine_compute.py', "int4_matmul.py", "matmul_leakyrelu.py", "triton_matmul.py", "l2_norm_bwd.py", "swiglu_fwd.py", "embedding_triton_kernel.py", "rotary_transform.py", "matrix_vector_multip.py"]
 # you can specify which kernels you want to generate by setting target_kernels. null means all 10 kernels for hackathon.
