@@ -4,12 +4,12 @@ model_id: "Kimi-K2-Instruct"
 temperature: 1.0
 
 # TritonBench
-statis_path: "/root/GEAK-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"
-py_folder: "/root/GEAK-agent/src/dataloaders/TB_eval/data/TritonBench_G_v1_hackathon"
-instruction_path: "/root/GEAK-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"
-corpus_path: "/root/GEAK-agent/src/dataloaders/TB_eval/data/train_crawl.json"
-golden_metrics: "/root/GEAK-agent/src/dataloaders/TB_eval/data/performance_metrics/golden_metrics_hackathon"
-perf_G_path: "/root/GEAK-agent/src/dataloaders/TB_eval/data/performance_metrics"
+statis_path: "/hackathon-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"
+py_folder: "/hackathon-agent/src/dataloaders/TB_eval/data/TritonBench_G_v1_hackathon"
+instruction_path: "/hackathon-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"
+corpus_path: "/hackathon-agent/src/dataloaders/TB_eval/data/train_crawl.json"
+golden_metrics: "/hackathon-agent/src/dataloaders/TB_eval/data/performance_metrics/golden_metrics_hackathon"
+perf_G_path: "/hackathon-agent/src/dataloaders/TB_eval/data/performance_metrics"
 perf_ref_folder: null
 py_interpreter: "python"
 
