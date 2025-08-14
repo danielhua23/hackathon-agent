@@ -7,9 +7,9 @@ from multiprocessing import Pool, Lock, Value
 
 # Assuming these are in your project structure
 from dataloaders.ProblemState import ProblemStateROCm
-from tb_eval.evaluators.interface import get_evaluators
-from tb_eval.helpers.helper import extract_first_pytest_failure
-from tb_eval.perf.efficiency import get_perf_evaluators
+from geak_eval.evaluators.interface import get_evaluators
+from geak_eval.helpers.helper import extract_first_pytest_failure
+from geak_eval.perf.efficiency import get_perf_evaluators
 
 class ROCm:
     def __init__(self,
