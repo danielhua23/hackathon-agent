@@ -102,7 +102,26 @@ class Reflexion_Oneshot(Reflexion):
             
             """
             Run the scripts to verify whether the generated kernels can execute without errors.
-            To check for correctness against expected outputs, use the test_opt_correctness method from TritonBench.
+            To check for correctness against expected outputs, use the test_opt_correctness method from TritonBench:
+
+            if self.config.agent.output_path is not None:
+                    root, extension = os.path.splitext(self.config.agent.output_path)
+                    tmp_dir = f"{root}_tmp_{n}"
+                    exe_dir = f"{root}_pass_exe_{n}"
+                    perf_result_dir = f"{root}_perf_results_{n}"
+                    perf_log_dir = f"{root}_perf_logs_{n}"
+
+                else:
+                    tmp_dir = f"tmp_{n}"
+                    exe_dir = f"pass_exe_{n}"
+                    perf_result_dir = f"perf_results_{n}"
+                    perf_log_dir = f"perf_logs_{n}"
+
+                for fn, mems in tqdm(current_memories.items()):
+                    mem = mems[n]
+                    try:
+                        pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(mem.code, mem.ps.filename, tmp_dir, exe_dir=exe_dir)
+            
             """
             logger.info(f"\nrun scripts on gpu")
             for mem in tqdm(self.memories[:data_len]):
