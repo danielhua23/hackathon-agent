@@ -1,10 +1,10 @@
 import sys
 import os
 import json
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from TritonBench_v1.cosine_compute import cos
+# Correctly import the kernel function
+from TritonBench_v1.sin_kernel import call_kernel
 from performance_utils import Performance_Metrics, do_bench_config
 
 import torch
@@ -13,20 +13,20 @@ import triton.language as tl
 
 class performance_metrics(Performance_Metrics):
     def __init__(self, dtype=None, is_backward=False, **kwargs):
-        super().__init__('cosine_compute', dtype=dtype, is_backward=is_backward, **kwargs)
+        super().__init__('sin_kernel', dtype=dtype, is_backward=is_backward, **kwargs)
         
     def get_input_tensors(self):
         self.input_tensors = []
         for i in range(12, 28):
             size = 2 ** i
-            input_tensor = torch.rand(size, dtype=torch.float16)
+            input_tensor = torch.rand(size, dtype=torch.float32)
             self.input_tensors.append(input_tensor)
 
     def to_cuda(self, input_tensor):
         return input_tensor.cuda()
 
     def call_op(self, input_tensor):
-        return cos(input_tensor)
+        return call_kernel(input_tensor)
 
     def get_gbps(self, input_tensor, runtime):
         x = input_tensor
@@ -36,7 +36,7 @@ class performance_metrics(Performance_Metrics):
     
     def get_tflops(self, input_tensor, runtime):
         x = input_tensor
-        FLOPS = x.numel()  # One cosine operation per element
+        FLOPS = x.numel()  # One sin operation per element
         TFLOPS = FLOPS / (runtime / 1000) / 1e12
         return TFLOPS
     

@@ -4,7 +4,7 @@ import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from TritonBench_v1.swiglu_fwd import _swiglu_fwd
+from TritonBench_v1.matrix_transpose import wrapper
 from performance_utils import Performance_Metrics, do_bench_config
 
 import torch
@@ -13,32 +13,32 @@ import triton.language as tl
 
 class performance_metrics(Performance_Metrics):
     def __init__(self, dtype=None, is_backward=False, **kwargs):
-        super().__init__('swiglu_fwd', dtype=dtype, is_backward=is_backward, **kwargs)
+        super().__init__('matrix_transpose', dtype=dtype, is_backward=is_backward, **kwargs)
         
     def get_input_tensors(self):
         self.input_tensors = []
-        for i in range(4, 22):
-            size = 2 ** i
-            # Create a tensor with two concatenated parts for x and y
-            input_tensor = torch.rand((128, size), dtype=torch.float32)
+        for i in range(2, 10):  # Adjust the range as needed for testing
+            size_m = 128
+            d_head = 2 ** i
+            input_tensor = torch.randn((size_m, d_head), dtype=torch.float16)
             self.input_tensors.append(input_tensor)
 
     def to_cuda(self, input_tensor):
         return input_tensor.cuda()
 
     def call_op(self, input_tensor):
-        return _swiglu_fwd(input_tensor)
+        return wrapper(input_tensor.size(0), input_tensor.size(1))
 
     def get_gbps(self, input_tensor, runtime):
-        xy = input_tensor
-        total_bytes = 3 * xy.numel() * xy.element_size() / 2  # 2 reads (x and y) and 1 write (out)
+        size_m, d_head = input_tensor.size()
+        total_bytes = 2 * size_m * d_head * 2  # 2 bytes per float16 element
         GBPS = total_bytes / (runtime / 1000) / 1e9
         return GBPS
     
     def get_tflops(self, input_tensor, runtime):
-        xy = input_tensor
-        FLOPS = 3 * xy.numel()  # Each element involves 3 operations: multiply, sigmoid, multiply
-        TFLOPS = FLOPS / (runtime / 1000) / 1e12
+        size_m, d_head = input_tensor.size()
+        # Transpose operation doesn't involve floating point operations, so TFLOPS is 0
+        TFLOPS = 0
         return TFLOPS
     
     def run_benchmark(self):
