@@ -90,7 +90,7 @@ class Reflexion_Oneshot(Reflexion):
             logger.info(f"\ngenerate solution")
             with tqdm(total=data_len) as pbar:
                 if multi_thread:
-                    
+        
                     with ThreadPoolExecutor(max_workers=thread_num) as executor:
                         futures = {executor.submit(self.generate_solution, mem, temperature): mem for mem in self.memories[:data_len]}
                         for future in as_completed(futures):
@@ -114,7 +114,7 @@ class Reflexion_Oneshot(Reflexion):
                 tmp_dir = f"{root}_tmp"
                 exe_dir = f"{root}_pass_exe"
                 perf_result_dir = f"{root}_perf_results"
-            
+            breakpoint()
             for mem in tqdm(self.memories[:data_len]):
                 if mem.pass_exe:
                     continue
@@ -133,7 +133,7 @@ class Reflexion_Oneshot(Reflexion):
                     mem.pass_exe = True
             """
             To measure kernel speedup, follow these steps:
-            
+            """
             root, extension = os.path.splitext(output_path)
             exe_dir = os.path.join(root,exe_dir) if output_path else exe_dir
             perf_result_dir = os.path.join(root, perf_result_dir) if output_path else perf_result_dir
@@ -157,9 +157,7 @@ class Reflexion_Oneshot(Reflexion):
                 assert len(passed_mems) == len(perf_results_list)
                 for mem, perf_data in zip(passed_mems, perf_results_list):
                     speedup = perf_data.get("ms")
-                    efficiency = perf_data.get("efficiency")
-            """     
-            
+                    efficiency = perf_data.get("efficiency")     
 
             # generate reflections
             logger.info(f"\ngenerate reflections")
