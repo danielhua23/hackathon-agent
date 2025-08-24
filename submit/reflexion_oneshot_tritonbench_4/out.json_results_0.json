@@ -1,0 +1,92 @@
+[
+    {
+        "pass_num": 0,
+        "file_name": "matrix_vector_multip.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/matrix_vector_multip.py_gen_triton_code_501718.py\", line 76, in <module>\n    result_gold = test_mv()\n                  ^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/matrix_vector_multip.py_gen_triton_code_501718.py\", line 52, in test_mv\n    triton_result_2 = mv(A, B)\n                      ^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/matrix_vector_multip.py_gen_triton_code_501718.py\", line 35, in mv\n    mv_kernel[grid](A, B, out, M, N, A.stride(0), A.stride(1), B.stride(0), out.stride(0))\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 347, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 192, in run\n    timings = {config: self._bench(*args, config=config, **kwargs) for config in pruned_configs}\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 170, in _bench\n    return self.do_bench(kernel_call, quantiles=(0.5, 0.2, 0.8))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/testing.py\", line 145, in do_bench\n    fn()\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 156, in kernel_call\n    self.fn.run(\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 569, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 278, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 81, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 7:4:\ndef mv_kernel(A, B, C, M, N, stride_am, stride_an, stride_b, stride_c, BLOCK_M: tl.constexpr, BLOCK_K: tl.constexpr):\n    pid_n = tl.program_id(0)\n    offs_n = pid_n * BLOCK_M + tl.arange(0, BLOCK_M)\n    mask_n = offs_n < M\n    acc = tl.zeros([BLOCK_M], dtype=tl.float32)\n    LOOP_K_MAX: tl.constexpr = tl.cdiv(N, BLOCK_K)\n    for k_off in tl.static_range(0, LOOP_K_MAX):\n    ^\nTypeError(\"'tensor' object cannot be interpreted as an integer\")",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "triton_matmul.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/core.py\", line 34, in wrapper\n    return fn(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/core.py\", line 1914, in load\n    return semantic.load(pointer, mask, other, boundary_check, padding_option, cache_modifier, eviction_policy,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/semantic.py\", line 1147, in load\n    return _load_legacy(ptr, mask, other, boundary_check, padding, cache, eviction, is_volatile, builder)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/semantic.py\", line 1079, in _load_legacy\n    raise ValueError(\"`other` cannot be provided without `mask`\")\nValueError: `other` cannot be provided without `mask`\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/triton_matmul.py_gen_triton_code_509196.py\", line 95, in <module>\n    result_gold = test_matmul()\n                  ^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/triton_matmul.py_gen_triton_code_509196.py\", line 83, in test_matmul\n    c = matmul(a, b)\n        ^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/triton_matmul.py_gen_triton_code_509196.py\", line 54, in matmul\n    matmul_kernel[grid](a, b, out, M, N, K, a.stride(0), a.stride(1), b.stride(0), b.stride(1), out.stride(0), out.stride(1))\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 347, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 192, in run\n    timings = {config: self._bench(*args, config=config, **kwargs) for config in pruned_configs}\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 170, in _bench\n    return self.do_bench(kernel_call, quantiles=(0.5, 0.2, 0.8))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/testing.py\", line 145, in do_bench\n    fn()\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 156, in kernel_call\n    self.fn.run(\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 569, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 278, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 81, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 21:16:\n    pid_n = pid % num_pid_in_group % num_pid_n\n    offs_am = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)\n    offs_bn = pid_n * BLOCK_N + tl.arange(0, BLOCK_N)\n    offs_k = tl.arange(0, BLOCK_K)\n    A_ptrs = A_ptr + (offs_am[:, None] * stride_am + offs_k[None, :] * stride_ak)\n    B_ptrs = B_ptr + (offs_k[:, None] * stride_bk + offs_bn[None, :] * stride_bn)\n    C_ptrs = C_ptr + offs_am[:, None] * stride_cm + offs_bn[None, :] * stride_cn\n    accumulator = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)\n    k_loop = tl.cdiv(K, BLOCK_K)\n    for k_idx in tl.static_range(8):\n        if k_idx < k_loop:\n            a = tl.load(A_ptrs, mask=None, other=0.0)\n                ^",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "embedding_triton_kernel.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_102398.py\", line 161, in <module>\n    result_gold = test_embedding()\n                  ^^^^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_102398.py\", line 91, in test_embedding\n    embedding(input_ids, weight, vob_start_id, vob_end_id, out)\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_102398.py\", line 26, in embedding\n    assert weight.ndim == 2\n           ^^^^^^^^^^^^^^^^\nAssertionError",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "int4_matmul.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/int4_matmul.py_gen_triton_code_907291.py\", line 149, in <module>\n    result_gold = test_correct_int4_s2()\n                  ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/int4_matmul.py_gen_triton_code_907291.py\", line 127, in test_correct_int4_s2\n    int_b, b_scale, b_zero_point, _ = quantize_int4(b, group_size=group_size)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: not enough values to unpack (expected 4, got 3)",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "flash_decode2_phi.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_239111.py\", line 164, in <module>\n    result_gold = test_flash_decode_stage2()\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_239111.py\", line 152, in test_flash_decode_stage2\n    flash_decode_stage2(test_case[\"mid_out\"], test_case[\"mid_out_logexpsum\"], test_case[\"B_Seqlen\"], test_case[\"Out\"], test_case[\"block_seq\"])\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_239111.py\", line 53, in flash_decode_stage2\n    _fwd_kernel_flash_decode_stage2_tuned[grid](B_Seqlen, Mid_O, Mid_O_LogExpSum, Out, Mid_O.stride(0), Mid_O.stride(1), Mid_O.stride(2), Mid_O.stride(3), Mid_O_LogExpSum.stride(0), Mid_O_LogExpSum.stride(1), Mid_O_LogExpSum.stride(2), Out.stride(0), Out.stride(1), Out.stride(2), head_dim=head_dim, max_seq_blocks=seq_blk_max)\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 347, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 192, in run\n    timings = {config: self._bench(*args, config=config, **kwargs) for config in pruned_configs}\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 170, in _bench\n    return self.do_bench(kernel_call, quantiles=(0.5, 0.2, 0.8))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/testing.py\", line 145, in do_bench\n    fn()\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 156, in kernel_call\n    self.fn.run(\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 557, in run\n    raise KeyError(\"Keyword argument %s was specified but unrecognised\" % k)\nKeyError: 'Keyword argument head_dim was specified but unrecognised'",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "matrix_transpose.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "rotary_transform.py",
+        "call_status": 0,
+        "exec_status": 0,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/core.py\", line 34, in wrapper\n    return fn(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/core.py\", line 1451, in arange\n    return semantic.arange(start, end, _builder)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/language/semantic.py\", line 614, in arange\n    raise ValueError(\"arange's arguments must be of type tl.constexpr\")\nValueError: arange's arguments must be of type tl.constexpr\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/rotary_transform.py_gen_triton_code_723988.py\", line 211, in <module>\n    result_gold = test_apply_rotary()\n                  ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/rotary_transform.py_gen_triton_code_723988.py\", line 141, in test_apply_rotary\n    output = apply_rotary(x, cos, sin)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/rotary_transform.py_gen_triton_code_723988.py\", line 110, in apply_rotary\n    rotary_kernel[grid](x, cos, sin, out, cu_seqlens, seq_off_tensor, x.stride(0), x.stride(2), x.stride(1), x.stride(3), cos.stride(0), cos.stride(1), sin.stride(0), sin.stride(1), out.stride(0), out.stride(2), out.stride(1), out.stride(3), nheads, rotary_dim, headdim, x.shape[1] if not is_varlen else 0, interleaved, conjugate, isinstance(seqlen_offsets, torch.Tensor), is_varlen)\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 347, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 192, in run\n    timings = {config: self._bench(*args, config=config, **kwargs) for config in pruned_configs}\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 170, in _bench\n    return self.do_bench(kernel_call, quantiles=(0.5, 0.2, 0.8))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/testing.py\", line 145, in do_bench\n    fn()\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/autotuner.py\", line 156, in kernel_call\n    self.fn.run(\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/runtime/jit.py\", line 569, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 278, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/conda/envs/py_3.12/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 81, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 17:14:\n    if IS_VARLEN:\n        seq_start = tl.load(CU_SEQLENS + pid_batch).to(tl.int32)\n        seq_end = tl.load(CU_SEQLENS + pid_batch + 1).to(tl.int32)\n        cur_seqlen = seq_end - seq_start\n    else:\n        seq_start = 0\n        cur_seqlen = seqlen\n    if pid_m * BLOCK_M >= cur_seqlen:\n        return\n    BLOCK_K_ACT = min(BLOCK_K, rotary_dim_half)\n    rm = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)\n    rk_half = tl.arange(0, BLOCK_K_ACT)\n              ^",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "sin_kernel.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "l2_norm_bwd.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "l2_norm_triton1.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    }
+]

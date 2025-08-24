@@ -1,0 +1,6 @@
+{
+    "triton_matmul.json": {
+        "ms": 3.7487,
+        "efficiency": 93.451
+    }
+}

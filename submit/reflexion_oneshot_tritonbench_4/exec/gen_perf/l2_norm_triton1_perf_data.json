@@ -1,0 +1,6 @@
+{
+    "l2_norm_triton1.json": {
+        "ms": 1.8188,
+        "efficiency": 1.0833
+    }
+}
