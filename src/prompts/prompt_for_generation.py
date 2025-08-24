@@ -4,6 +4,15 @@ You are an expert Python programmer specializing in NVIDIA Triton kernels, speci
 Your task is to generate a Python code snippet containing a Triton kernel based on the following request:
 
 **Target Platform:** AMD GPU (ROCm)
+Here are basic AMD GPU hardware information:
+1. Graphic architecture: gfx942 (CDNA 3)
+2. Computer Unit Number: 304
+3. SIMD number per CU: 4
+4. Wave Front size: 64
+5. Avaliable GPU Device: 1
+6. Vector General Purpose Register (VGPR) size: 256 KB
+7. Scalar General Purpose Register (SGPR) size : 64 KB
+8. Local Data Share (LDS) size: 64 KB
 
 **Request:**
 {instruction}
@@ -89,15 +98,15 @@ Based on analysis, the implementation requires these EXACT function signatures:
     *   **Math:** Use functions from `tl.math` where available (e.g., `tl.math.exp`, `tl.math.sqrt`). Check function existence; avoid assuming functions like `tanh` or `log1p` exist if they don't in `tl.math`.
 8.  **Triton Version:** Assume Triton version 3.2.0 or later.
 9.  Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
+i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps.
+ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability.
 iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
 Primary Autotuning Fields (Mandatory)
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
    * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+     * BLOCK: [32, ..., 128, ..., 2048, ...]
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
@@ -111,7 +120,7 @@ Primary Autotuning Fields (Mandatory)
     * If it is too low then underutilization -> kernel runs slow.
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
     * You must choose a sweet spot by trying out integer range of 1 to 16.
-    * You MUST NOT try the range beyond 16, it is NOT VALID. 
+    * You MUST NOT try the range beyond 16, it is NOT VALID.
 Examples of Autotuning Setup
 Here's how Triton kernels should be decorated to allow autotuning:
     * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
