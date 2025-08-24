@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_555768 due to at 66:39:
+    rk_half = tl.arange(0, BLOCK_K // 2)
+
+    if not IS_SEQLEN_OFFSETS_TENSOR:
+        rm_cs = rm + SEQLEN_OFFSETS
+    else:
+        rm_cs = rm + tl.load(seqlen_offsets_ptr + pid_batch)
+
+    if not INTERLEAVED:
+        x0_ptr = X + rm[:, None] * stride_x_seqlen + rk_half[None, :] * stride_x_headdim
+        x1_ptr = X + rm[:, None] * stride_x_seqlen + (rk_half + rotary_dim_half)[None, :] * stride_x_headdim
+
+        c_ptr = COS + rm_cs[:, None] * stride_sin_seqlen + rk_half[None, :] * stride_sin_headdim
+                                       ^
+NameError("Cannot access global variable stride_sin_seqlen from within @jit'ed function. Triton kernels can only access global variables that are annotated as constexpr (`x: triton.language.constexpr = 42` or `x = triton.language.constexpr(42)`).  Alternatively, set the envvar TRITON_ALLOW_NON_CONSTEXPR_GLOBALS=1, but we do not promise to support this forever.")

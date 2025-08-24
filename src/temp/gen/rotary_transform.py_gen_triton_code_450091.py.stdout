@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_450091 due to at 65:14:
+    rm = pid_m * BLOCK_M + tl.arange(0, BLOCK_M)
+    mask_m = rm < current_seqlen
+
+    # sequence length offset
+    if IS_SEQLEN_OFFSETS_TENSOR:
+        seq_offset = tl.load(SEQLEN_OFFSETS + pid_batch).to(tl.int32)
+    else:
+        seq_offset = SEQLEN_OFFSETS  # scalar integer captured at launch & constant in kernel
+
+    # half-size dimension indices
+    rotary_dim_half = rotary_dim // 2
+    rk_half = tl.arange(0, rotary_dim_half)
+              ^

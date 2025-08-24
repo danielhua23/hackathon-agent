@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_99563 due to at 80:13:
+        if conjugate:
+            x1 = -x1
+
+        o0 = x0 * cos_val - x1 * sin_val
+        o1 = x0 * sin_val + x1 * cos_val
+
+        tl.store(out_base + (cols * 2) * stride_ok,     o0, mask=mask)
+        tl.store(out_base + (cols * 2 + 1) * stride_ok, o1, mask=mask)
+    else:
+        left_ptrs  = x_base + cols * stride_xk
+        right_ptrs = x_base + (cols + rotary_dim_half) * stride_xk
+        x0 = tl.load(left_ptrs,  mask=mask, other=0.0).to(tl.float32)
+             ^

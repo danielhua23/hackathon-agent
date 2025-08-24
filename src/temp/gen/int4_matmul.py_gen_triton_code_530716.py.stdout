@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module int4_matmul.py_gen_triton_code_530716 due to at 41:40:
+        # 8 contiguous floats
+        idx = shift + tl.arange(0, 8)
+        msk = (col_start + idx) < stride_sc
+        v   = tl.load(src_ptr + row * stride_sr + col_start + idx, mask=msk, other=0.0)
+
+        q   = ((v / scale + zero) + 0.5).to(tl.int32)
+        q   = tl.maximum(tl.minimum(q, 15), 0)
+
+        packed = tl.full([8], 0, dtype=tl.int32)
+        for ch in range(8):
+            packed = tl.where(msk,
+                              packed | (q[ch] << (ch * 4)),
+                                        ^
+ValueError('Did you forget to add @triton.jit ? (`_builder` argument must be provided outside of JIT functions.)')

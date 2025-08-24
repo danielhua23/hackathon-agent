@@ -78,25 +78,29 @@ class Reflexion_Oneshot(Reflexion):
     def run(self, output_path=None, multi_thread=True, verbose=False, datalen=None, iteration_num=0, temperature=0):
         data_len = datalen if datalen else len(self.dataset)
         for iter in range(iteration_num):
+            # Filter only failed kernels for this iteration
+            failed_memories = [mem for mem in self.memories[:data_len] if not mem.pass_exe]
+            
+            if not failed_memories:
+                logger.info(f"\n=== All kernels passed, stopping at iteration {iter} ===")
+                break
+                
             logger.info(f"\n=== Iteration {iter} ===")
-            if output_path is not None:
-                root, extension = os.path.splitext(output_path)
-                iter_path = f"{root}_{iter}{extension}"
+            logger.info(f"Processing {len(failed_memories)} failed kernels out of {data_len} total")
 
             if multi_thread:
                 thread_num = 3
             
-            # generate solution
-            logger.info(f"\ngenerate solution")
-            with tqdm(total=data_len) as pbar:
+            # generate solution for failed kernels only
+            logger.info(f"\ngenerate solution for failed kernels")
+            with tqdm(total=len(failed_memories)) as pbar:
                 if multi_thread:
-                    
                     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-                        futures = {executor.submit(self.generate_solution, mem, temperature): mem for mem in self.memories[:data_len]}
+                        futures = {executor.submit(self.generate_solution, mem, temperature): mem for mem in failed_memories}
                         for future in as_completed(futures):
                             pbar.update(1)
                 else:
-                    for mem in self.memories[:data_len]:
+                    for mem in failed_memories:
                         self.generate_solution(mem, temperature=temperature)
                         pbar.update(1)
             
@@ -115,9 +119,7 @@ class Reflexion_Oneshot(Reflexion):
                 exe_dir = f"{root}_pass_exe"
                 perf_result_dir = f"{root}_perf_results"
             
-            for mem in tqdm(self.memories[:data_len]):
-                if mem.pass_exe:
-                    continue
+            for mem in tqdm(failed_memories):
                 try:
                     pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(mem.ps.solution, mem.ps.filename, tmp_dir, exe_dir=exe_dir)
                 
@@ -131,6 +133,7 @@ class Reflexion_Oneshot(Reflexion):
                     mem.err_msg = exe_stderr
                 else:
                     mem.pass_exe = True
+                    mem.err_msg = None  # Clear previous error
             """
             To measure kernel speedup, follow these steps:
             
@@ -161,16 +164,17 @@ class Reflexion_Oneshot(Reflexion):
             """     
             
 
-            # generate reflections
-            logger.info(f"\ngenerate reflections")
-            with tqdm(total=data_len) as pbar:
+            # generate reflections for failed kernels only
+            logger.info(f"\ngenerate reflections for failed kernels")
+            still_failed_memories = [mem for mem in failed_memories if not mem.pass_exe]
+            with tqdm(total=len(still_failed_memories)) as pbar:
                 if multi_thread:
                     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-                        futures = {executor.submit(self.generate_reflexion, mem, temperature): mem for mem in self.memories[:data_len]}
+                        futures = {executor.submit(self.generate_reflexion, mem, temperature): mem for mem in still_failed_memories}
                         for future in as_completed(futures):
                             pbar.update(1)
                 else:
-                    for mem in self.memories[:data_len]:
+                    for mem in still_failed_memories:
                         self.generate_reflexion(mem, temperature=temperature)
                         pbar.update(1)
             
@@ -181,6 +185,7 @@ class Reflexion_Oneshot(Reflexion):
     
     def generate_solution(self, mem, temperature=0):
         if mem.pass_exe:
+            logger.debug(f"Skipping {mem.ps.filename} - already passed")
             return
         
         tab = "\n"
@@ -217,6 +222,7 @@ class Reflexion_Oneshot(Reflexion):
 
     def generate_reflexion(self, mem, temperature):
         if mem.pass_exe:
+            logger.debug(f"Skipping reflection for {mem.ps.filename} - already passed")
             return
         reflect_txt = prompt_for_reflection.prompt.format(
             problem=mem.ps.instruction,

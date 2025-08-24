@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module matrix_transpose.py_gen_triton_code_997014 due to at 14:30:
+    Out,
+    matrix_stridex,
+    matrix_stridey,
+    out_stridex,
+    out_stridey,
+    SIZE_M,
+    D_HEAD,
+):
+    pid_m = tl.program_id(0)
+    pid_d = tl.program_id(1)
+
+    offs_m = pid_m * D_HEAD + tl.arange(0, D_HEAD)
+                              ^

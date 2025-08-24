@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module matrix_transpose.py_gen_triton_code_529486 due to at 16:4:
+    matrix_stridey,
+    out_stridex,
+    out_stridey,
+    SIZE_M: tl.constexpr,
+    D_HEAD: tl.constexpr,
+):
+    size_m_arange = tl.arange(0, SIZE_M)
+    d_head_arange = tl.arange(0, D_HEAD)
+    matrix_ptr = M + d_head_arange[None, :] * matrix_stridex + size_m_arange[:, None] * matrix_stridey
+    out_ptr = Out + size_m_arange[None, :] * out_stridex + d_head_arange[:, None] * out_stridey
+    matrix = tl.load(matrix_ptr)
+    tl.store(out_ptr, matrix)
+    ^

@@ -25,6 +25,7 @@ class KimiK2Model(BaseModel):
             #api_key = "wisemodel-xxvqzbsnecjtoxufxodx",
             api_key=api_key,
             base_url = "https://laiyeapi.aifoundrys.com:7443/v1",
+            # base_url = "https://api.siliconflow.cn/v1",
             default_headers = headers
         )
         

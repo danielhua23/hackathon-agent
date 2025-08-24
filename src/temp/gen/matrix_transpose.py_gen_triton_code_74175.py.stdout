@@ -1,0 +1,8 @@
+False*#*#None*#*#None*#*#Could not execute module matrix_transpose.py_gen_triton_code_74175 due to at 6:30:
+def kernel(M, Out, matrix_stridex, matrix_stridey, out_stridex, out_stridey, SIZE_M, D_HEAD):
+    BLOCK_SIZE = 32
+    pid_m = tl.program_id(0)
+    pid_n = tl.program_id(1)
+
+    rm = pid_m * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)[:, None]
+                              ^

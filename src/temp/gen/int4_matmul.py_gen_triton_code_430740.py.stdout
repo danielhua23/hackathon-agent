@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module int4_matmul.py_gen_triton_code_430740 due to at 20:12:
+    BLOCK_SIZE_K: tl.constexpr, BLOCK_SIZE_N: tl.constexpr,
+):
+    group_pid = tl.program_id(0)
+    sub_k = group_pid * BLOCK_SIZE_K + tl.arange(0, BLOCK_SIZE_K)[:, None]
+    tid_n = tl.program_id(1)
+    sub_n = tid_n * BLOCK_SIZE_N + tl.arange(0, BLOCK_SIZE_N)[None, :]
+    mask_k = sub_k < K
+    mask_n = sub_n < N
+    mask = mask_k & mask_n
+    x = tl.load(x_ptr + sub_k * stride_xk + sub_n * stride_xn, mask=mask, other=0.0)
+    g_idx = sub_k // group_size
+    x_min = tl.min(x, axis=0, keepdim=True)
+            ^
+TypeError("min() got an unexpected keyword argument 'keepdim'")

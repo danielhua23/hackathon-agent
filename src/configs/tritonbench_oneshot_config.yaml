@@ -1,7 +1,8 @@
 # LLM model
-api_key: ""
+api_key: "wisemodel-lpjwbkzybasaizealiwx"
+# api_key: "wisemodel-vzelpgxleuvotybtfeqh"
 model_id: "Kimi-K2-Instruct"
-temperature: 1.0
+temperature: 1
 
 # TritonBench
 statis_path: "/hackathon-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"

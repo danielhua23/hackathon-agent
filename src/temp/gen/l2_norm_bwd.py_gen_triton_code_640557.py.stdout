@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module l2_norm_bwd.py_gen_triton_code_640557 due to at 21:32:
+    row = tl.program_id(0)
+    X += row * stride_x_row
+    DX += row * stride_x_row
+    DY += row * stride_x_row
+    cols = tl.arange(0, BLOCK_N)
+    mask = cols < N
+    x = tl.load(X + cols, mask=mask, other=0.0).to(tl.float32)
+    dy = tl.load(DY + cols, mask=mask, other=0.0).to(tl.float32)
+    var = tl.sum(x * x, axis=0)
+    rstd = tl.math.rsqrt(var + eps)
+    sum_dy_x = tl.sum(dy * x, axis=0)
+    dx = dy * rstd - sum_dy_x * rstd.pow(3) * x
+                                ^
+AttributeError("'tensor' object has no attribute 'pow'")
