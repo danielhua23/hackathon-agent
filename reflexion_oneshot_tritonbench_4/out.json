@@ -1,0 +1,42 @@
+2025-08-23_16-23-45 => File: matrix_vector_multip.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-24-10 => File: triton_matmul.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-24-19 => File: embedding_triton_kernel.py, Call Status: False, Exec Status: False, difficulty: -1, stderr: Traceback (most recent call last):
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_296397.py", line 158, in <module>
+    result_gold = test_embedding()
+                  ^^^^^^^^^^^^^^^^
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_296397.py", line 88, in test_embedding
+    embedding(input_ids, weight, vob_start_id, vob_end_id, out)
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/embedding_triton_kernel.py_gen_triton_code_296397.py", line 29, in embedding
+    out = out.view(B * SEQ_LEN, d_model)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: shape '[512000, 128]' is invalid for input of size 65536
+2025-08-23_16-24-28 => File: int4_matmul.py, Call Status: False, Exec Status: False, difficulty: -1, stderr: Traceback (most recent call last):
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/int4_matmul.py_gen_triton_code_126776.py", line 160, in <module>
+    result_gold = test_correct_int4_s2()
+                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/int4_matmul.py_gen_triton_code_126776.py", line 144, in test_correct_int4_s2
+    triton_output = matmul_dequantize_int4_s2(a, int_b, b_scale, b_zero_point, group_size)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/int4_matmul.py_gen_triton_code_126776.py", line 54, in matmul_dequantize_int4_s2
+    assert K == qweight.shape[0] * 8
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+2025-08-23_16-24-38 => File: flash_decode2_phi.py, Call Status: False, Exec Status: False, difficulty: -1, stderr: Traceback (most recent call last):
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_577640.py", line 157, in <module>
+    result_gold = test_flash_decode_stage2()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_577640.py", line 145, in test_flash_decode_stage2
+    flash_decode_stage2(test_case["mid_out"], test_case["mid_out_logexpsum"], test_case["B_Seqlen"], test_case["Out"], test_case["block_seq"])
+  File "/opt/conda/envs/py_3.12/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/reflexion_oneshot_tritonbench_4/tmp/tmp/gen/flash_decode2_phi.py_gen_triton_code_577640.py", line 34, in flash_decode_stage2
+    assert Mid_O.dim() == 4
+           ^^^^^^^^^^^^^^^^
+AssertionError
+2025-08-23_16-24-57 => File: matrix_transpose.py, Call Status: True, Exec Status: False, difficulty: -1, stderr: Generated output does not match reference output for file: matrix_transpose.py_gen_triton_code_179599.py
+2025-08-23_16-25-17 => File: rotary_transform.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-25-37 => File: sin_kernel.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-25-56 => File: l2_norm_bwd.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-26-15 => File: l2_norm_triton1.py, Call Status: True, Exec Status: True, difficulty: -1, stderr: None
+2025-08-23_16-26-15 => File: /workspace/reflexion_oneshot_tritonbench_4.json, Call Accuracy: 0.7, Exec Accuracy: 0.6

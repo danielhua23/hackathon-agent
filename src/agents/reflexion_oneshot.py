@@ -40,7 +40,9 @@ class Reflexion_Oneshot(Reflexion):
                                                              "reflection", 
                                                              "function_signatures", 
                                                              "oneshot",
-                                                             "pass_call", 
+                                                             "pass_call",
+                                                             "pass_exe",
+                                                             "code" 
                                                             ]):
             pass
         
@@ -63,6 +65,8 @@ class Reflexion_Oneshot(Reflexion):
                                 function_signatures=fs_mem, 
                                 oneshot=os_mem["code"],
                                 pass_call=False,
+                                pass_exe=False,
+                                code=os_mem["code"]
                                 )
             else:
                 input_mem = input_mems[ps.filename]
@@ -72,6 +76,8 @@ class Reflexion_Oneshot(Reflexion):
                                 function_signatures=fs_mem, 
                                 oneshot=input_mem["oneshot"],
                                 pass_call=input_mem["pass_call"],
+                                pass_exe=input_mem["pass_exe"],
+                                code=input_mem["code"]
                                 )
             self.memories.append(tmp_mem)
 
@@ -103,26 +109,35 @@ class Reflexion_Oneshot(Reflexion):
             """
             Run the scripts to verify whether the generated kernels can execute without errors.
             To check for correctness against expected outputs, use the test_opt_correctness method from TritonBench:
-
-            if self.config.agent.output_path is not None:
-                    root, extension = os.path.splitext(self.config.agent.output_path)
-                    tmp_dir = f"{root}_tmp_{n}"
-                    exe_dir = f"{root}_pass_exe_{n}"
-                    perf_result_dir = f"{root}_perf_results_{n}"
-                    perf_log_dir = f"{root}_perf_logs_{n}"
-
-                else:
-                    tmp_dir = f"tmp_{n}"
-                    exe_dir = f"pass_exe_{n}"
-                    perf_result_dir = f"perf_results_{n}"
-                    perf_log_dir = f"perf_logs_{n}"
-
-                for fn, mems in tqdm(current_memories.items()):
-                    mem = mems[n]
-                    try:
-                        pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(mem.code, mem.ps.filename, tmp_dir, exe_dir=exe_dir)
-            
             """
+            if output_path is not None:
+                root, extension = os.path.splitext(output_path)
+                tmp_dir = f"{root}_tmp_{iter}"
+                exe_dir = f"{root}_pass_exe_{iter}"
+                perf_result_dir = f"{root}_perf_results_{iter}"
+                perf_log_dir = f"{root}_perf_logs_{iter}"
+
+            else:
+                tmp_dir = f"tmp_{iter}"
+                exe_dir = f"pass_exe_{iter}"
+                perf_result_dir = f"perf_results_{iter}"
+                perf_log_dir = f"perf_logs_{iter}"
+
+            for mem in tqdm(self.memories[:data_len]):
+                if mem.pass_exe:
+                    continue
+                try:
+                    pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(mem.code, mem.ps.filename, tmp_dir, exe_dir=exe_dir)
+                except Exception as e:
+                    logger.info(f"failed to test the code due to : {e}")
+                    mem.err_msg = f"failed to test the code due to: {e}"
+                    continue
+                if not pass_call:
+                    mem.err_msg = call_stderr
+                elif not pass_exe:
+                    mem.err_msg = exe_stderr
+                else:
+                    mem.pass_exe = True
             logger.info(f"\nrun scripts on gpu")
             for mem in tqdm(self.memories[:data_len]):
                 if mem.pass_call:
@@ -132,9 +147,9 @@ class Reflexion_Oneshot(Reflexion):
                     mem.err_msg = err_msg
             """
             To measure kernel latency, follow these steps:
-
-            self.dataset.write_perf_file(input_folder_path=exe_dir, results_path=perf_result_dir, tmp_dir=script_dir)
-            self.dataset.run_perf_scripts(gpu_id=gpu_id, script_dir=script_dir, log_dir=perf_log_dir)
+            """
+            self.dataset.write_perf_file(input_folder_path=exe_dir, results_path=perf_result_dir, tmp_dir=tmp_dir)
+            self.dataset.run_perf_scripts(script_dir=tmp_dir, log_dir=perf_log_dir)
 
             for mem in self.memories[:data_len]:
                 path_gen = os.path.join(perf_result_dir, mem.ps.filename[:-3] + ".json")
@@ -149,8 +164,6 @@ class Reflexion_Oneshot(Reflexion):
                     
                 except Exception as e:
                     print(f"{mem.ps.filename} failed due to {e}")
-
-            """
 
             # generate reflections
             logger.info(f"\ngenerate reflections")
@@ -221,3 +234,16 @@ class Reflexion_Oneshot(Reflexion):
             }
         ]
         mem.reflection = self.model.generate(reflect_msg, temperature=temperature)
+
+    def save_memory(self, save_path="memory", datalen=None):
+        data_len = datalen if datalen else len(self.dataset)
+        for i, mem in enumerate(self.memories[:data_len]):
+            mem_dict = {}
+            mem_dict["err_msg"] = mem.err_msg
+            mem_dict["reflection"] = mem.reflection
+            mem_dict["function_signatures"] = mem.function_signatures
+            mem_dict["oneshot"] = mem.oneshot
+            mem_dict["pass_call"] = mem.pass_call
+            mem_dict["pass_exe"] = mem.pass_exe
+            mem_dict["code"] = mem.code
+            json.dump(f"{save_path}_file_{i}".json)
