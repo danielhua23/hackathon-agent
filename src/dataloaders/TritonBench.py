@@ -7,8 +7,8 @@ from tqdm import tqdm
 import signal
 from multiprocessing import Pool, Lock, Value
 from dataloaders.ProblemState import ProblemState
-from dataloaders.TB_eval.utils import code_call_exec_success_allclose
-
+from dataloaders.TB_eval.utils import code_call_exec_success_allclose, process_code
+from loguru import logger
 
 
 class TritonBench:
@@ -45,6 +45,9 @@ class TritonBench:
                 instruction = line["instruction"]
                 # label = line["output"]
                 file = line["file"]
+                if target_kernels is not None and file not in target_kernels:
+                    logger.info(f"skip {file} because it is not in target_kernels")
+                    continue
                 label = None
 
                 path = os.path.join(self.py_folder, file)
@@ -52,10 +55,18 @@ class TritonBench:
                 test_code = open(path, "r", encoding="utf-8").read().split("#"*146)[-1]
                 assert "def test_" in  test_code, ""
 
+                ref_code = None
+                if self.py_folder is not None:
+                    path = os.path.join(self.py_folder, file)
+                    assert os.path.exists(path), f"{path} not exist!"
+                    ref_code = open(path, "r").read().split("#"*146)[0]
+                    ref_code = process_code(ref_code)
+
                 problemstate = ProblemState(instruction=instruction,
                                             label=label, 
                                             test_code=test_code, 
                                             filename=file, 
+                                            ref_code=ref_code,
                                             )
                 
                 problem_states.append(

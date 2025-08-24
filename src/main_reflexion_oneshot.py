@@ -4,7 +4,11 @@ from agents.reflexion_oneshot import Reflexion_Oneshot
 from models.KimiK2 import KimiK2Model
 from dataloaders.TritonBench import TritonBench
 from args_config import load_config
-
+from loguru import logger
+import sys, time
+logger.remove()
+logger.add(sys.stdout, level="INFO")
+logger.add(f"logs/reflexion_oneshot_debug_{time.strftime('%Y%m%d_%H%M%S')}.log", level="DEBUG")
 
 def main():
     args = load_config("configs/tritonbench_oneshot_config.yaml")

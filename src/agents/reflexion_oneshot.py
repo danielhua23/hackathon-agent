@@ -53,17 +53,29 @@ class Reflexion_Oneshot(Reflexion):
         for ps in self.dataset.problem_states:
             if ps.label:
                 fs_mem = extract_function_signatures(ps.label)
+            elif ps.ref_code is not None:
+                fs_mem = extract_function_signatures(ps.ref_code)
             else:
                 fs_mem = None
             if mem_file is None:
-                os_mem = self.instruction_retriever.query(ps.instruction)[0]
-                tmp_mem = Memory(ps=ps, 
-                                err_msg=None, 
-                                reflection=None, 
-                                function_signatures=fs_mem, 
-                                oneshot=os_mem["code"],
-                                pass_call=False,
-                                )
+                if ps.ref_code is not None:
+                    # read the reference code from the reference path
+                    tmp_mem = Memory(ps=ps, 
+                                    err_msg=None, 
+                                    reflection=None, 
+                                    function_signatures=fs_mem, 
+                                    oneshot=ps.ref_code,
+                                    pass_call=False,
+                                    )
+                else:
+                    os_mem = self.instruction_retriever.query(ps.instruction)[0]
+                    tmp_mem = Memory(ps=ps, 
+                                    err_msg=None, 
+                                    reflection=None, 
+                                    function_signatures=fs_mem, 
+                                    oneshot=os_mem["code"],
+                                    pass_call=False,
+                                    )
             else:
                 input_mem = input_mems[ps.filename]
                 tmp_mem = Memory(ps=ps, 
@@ -128,7 +140,10 @@ class Reflexion_Oneshot(Reflexion):
                 if mem.pass_call:
                     continue
                 is_pass, err_msg = self.dataset.run_single_call(mem.ps)
-                if not is_pass:
+                if is_pass:
+                    mem.pass_call = True
+                else:
+                    mem.pass_call = False
                     mem.err_msg = err_msg
             """
             To measure kernel latency, follow these steps:
@@ -176,9 +191,9 @@ class Reflexion_Oneshot(Reflexion):
         
         # tab = "\n"
         # fss_text = "".join(f"* {sig}{tab}" for sig in mem.function_signatures)
-        text = prompt_for_generation.prompt.format(
+        text = prompt_for_generation.my_prompt.format(
             instruction=mem.ps.instruction,
-            function_signatures=""
+            function_signatures=mem.function_signatures if mem.function_signatures else ""
         )
 
         if not mem.ps.solution:
@@ -209,7 +224,7 @@ class Reflexion_Oneshot(Reflexion):
     def generate_reflexion(self, mem, temperature):
         if mem.pass_call:
             return
-        reflect_txt = prompt_for_reflection.prompt.format(
+        reflect_txt = prompt_for_reflection.my_prompt.format(
             problem=mem.ps.instruction,
             solution=mem.ps.solution,
             test_result=mem.err_msg
