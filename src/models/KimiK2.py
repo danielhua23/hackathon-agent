@@ -2,9 +2,12 @@ import os
 from typing import List
 import openai
 from tenacity import retry, stop_after_attempt, wait_random_exponential
+import logging
 
 from models.Base import BaseModel
 
+# 创建日志记录器
+logger = logging.getLogger(__name__)
 
 class KimiK2Model(BaseModel):
     def __init__(self, 
@@ -25,6 +28,7 @@ class KimiK2Model(BaseModel):
             #api_key = "wisemodel-xxvqzbsnecjtoxufxodx",
             api_key=api_key,
             base_url = "https://laiyeapi.aifoundrys.com:7443/v1",
+            # base_url = "https://api.moonshot.cn/v1",
             default_headers = headers
         )
         
@@ -35,6 +39,9 @@ class KimiK2Model(BaseModel):
                  presence_penalty=0, 
                  frequency_penalty=0, 
                  max_tokens=5000) -> str:
+        logger.info(f"Sending request to model {self.model_id} with {len(messages)} messages")
+        logger.debug(f"Messages content: {messages}")
+        
         response = self.client.chat.completions.create(
             model=self.model_id,
             messages=messages,
@@ -44,8 +51,12 @@ class KimiK2Model(BaseModel):
         )
         
         if not response or not hasattr(response, 'choices') or len(response.choices) == 0:
-            raise ValueError("No response choices returned from the API.")
+            error_msg = "No response choices returned from the API."
+            logger.error(error_msg)
+            raise ValueError(error_msg)
 
-        return response.choices[0].message.content
-   
-
+        result = response.choices[0].message.content
+        logger.info(f"Received response from model {self.model_id}, response length: {len(result)} characters")
+        logger.debug(f"Response content: {result[:200]}..." if len(result) > 200 else f"Response content: {result}")
+        
+        return result

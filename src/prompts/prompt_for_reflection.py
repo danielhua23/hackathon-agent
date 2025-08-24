@@ -1,6 +1,5 @@
 prompt = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. Analyze the failed test cases and provide detailed insights on why the solution failed and how it could be improved. Be specific about the issues found and provide actionable recommendations.
 
 **Original problem:**
 
@@ -14,19 +13,36 @@ on why the solution failed and how it could be improved. Be specific about the i
 
 {test_result}
 
+**Thinking Process:**
+Before providing your reflection, think through the following steps:
+1. Identify the type of failure (syntax error, runtime error, correctness issue, performance issue)
+2. Locate the specific part of the code causing the failure
+3. Analyze why this part is problematic in the context of AMD GPU architecture
+4. Propose specific fixes or improvements
+
 **Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the reflection. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**AMD GPU and Performance Optimization Focus:**
+When analyzing the code, pay special attention to these key areas:
+1. AMD GPU compatibility issues (e.g., CUDA-specific code, incorrect memory access patterns)
+2. Wavefront efficiency (64-thread wavefronts on AMD vs 32-thread warps on NVIDIA)
+3. Memory coalescing and bank conflict issues
+4. Shared memory usage optimization
+5. Register pressure and spillage
+6. Autotuning parameters (BLOCK_M, BLOCK_N, BLOCK_K, num_warps, num_stages) for AMD architecture
+7. Divergent branching within wavefronts
 """
 
 prompt_exe = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
-Runnable test is used to test if the code can be successfully executed.
-Correctness test is used to test if the output of the code is correct, i.e. if the code does implement the functionality required in the original problem.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. Analyze the failed test cases and provide detailed insights on why the solution failed and how it could be improved. Be specific about the issues found and provide actionable recommendations.
+
+Different types of tests have been run:
+- Runnable test: Checks if the code can be successfully executed (compiles and runs without crashing)
+- Correctness test: Checks if the output of the code is correct (implements the required functionality)
 
 **Original problem:**
 
@@ -44,20 +60,34 @@ Correctness test is used to test if the output of the code is correct, i.e. if t
 
 {exe_test_result}
 
+**Thinking Process:**
+Before providing your reflection, think through the following steps:
+1. Identify the type of failure (syntax error, runtime error, correctness issue, performance issue)
+2. Locate the specific part of the code causing the failure
+3. Analyze why this part is problematic in the context of AMD GPU architecture
+4. Propose specific fixes or improvements
+
 **Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the reflection. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**AMD GPU and Performance Optimization Focus:**
+When analyzing the code, pay special attention to these key areas:
+1. AMD GPU compatibility issues (e.g., CUDA-specific code, incorrect memory access patterns)
+2. Wavefront efficiency (64-thread wavefronts on AMD vs 32-thread warps on NVIDIA)
+3. Memory coalescing and bank conflict issues
+4. Shared memory usage optimization
+5. Register pressure and spillage
+6. Autotuning parameters (BLOCK_M, BLOCK_N, BLOCK_K, num_warps, num_stages) for AMD architecture
+7. Divergent branching within wavefronts
 """
 
 prompt_ga = """
-You are an expert in writing Triton operators for efficient GPU programming. 
-Analyze this Triton code and its performance(latency in ms and efficiency in TFLOPS or GB/s), and give a summary about the optimization strategy that the code uses.
-Provide insights on how to generate a new code with better performance. 
-You can use optimization strategies such as Memory access efficiency, Hardware resource utilization, IR analysis, Assembly analysis, Kernel occupancy, 
-TorchInductor with Triton tuning knobs and Auto-tunable kernel configurations and environment variables.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. 
+Analyze this Triton code and its performance (latency in ms and efficiency in TFLOPS or GB/s), and provide a detailed summary of the optimization strategy that the code uses.
+Provide specific insights on how to generate a new code with better performance. 
 
 **Original problem:**
 
@@ -73,17 +103,32 @@ latency: {latency}"
 
 efficiency(TFLOPS, GB/s): {efficiency}
 
+**Thinking Process:**
+Before providing your optimization insights, think through the following steps:
+1. Analyze the current performance bottlenecks
+2. Identify which parts of the code contribute most to the latency
+3. Evaluate how well the code utilizes AMD GPU resources
+4. Suggest specific optimizations that could improve performance
+
 **Important Instructions:**
-- Think before writing the optimization and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the optimization insights. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function and parameter names, counts, or order.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**AMD GPU Optimization Focus:**
+When analyzing the code, pay special attention to these key optimization areas:
+1. Wavefront efficiency (64-thread wavefronts on AMD) - ensure high occupancy with proper block sizes
+2. Memory coalescing and bank conflict issues specific to AMD GPUs
+3. Shared memory usage optimization - minimize conflicts and maximize reuse
+4. Register pressure and spillage - keep register usage low to prevent performance degradation
+5. Autotuning parameters (BLOCK_M, BLOCK_N, BLOCK_K, num_warps, num_stages) for AMD architecture
+6. Divergent branching within wavefronts - minimize conditional execution paths
+7. Memory hierarchy utilization - optimize for L1/L2 cache and global memory access patterns
 """
 
 prompt_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. Analyze the failed test cases and provide detailed insights on why the solution failed and how it could be improved. Be specific about the issues found and provide actionable recommendations.
 
 **Original problem:**
 
@@ -97,22 +142,31 @@ on why the solution failed and how it could be improved. Be specific about the i
 
 {test_result}
 
+**Thinking Process:**
+Before providing your reflection, think through the following steps:
+1. Identify the type of failure (syntax error, runtime error, correctness issue, performance issue)
+2. Locate the specific part of the code causing the failure
+3. Analyze why this part is problematic in the context of AMD GPU architecture
+4. Propose specific fixes or improvements
+
 **Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the reflection. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
+**Performance Optimization Strategy:**
+Maximize performance by exploring the following areas:
+i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps - find optimal values for AMD GPU architecture.
+ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability.
+iii. Exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
+**Primary Autotuning Fields (Mandatory)**
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
    * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+     * BLOCK: [32, 64, 128, 256, 512] - optimal values for AMD GPU wavefront efficiency
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
@@ -127,29 +181,22 @@ Primary Autotuning Fields (Mandatory)
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
     * You must choose a sweet spot by trying out integer range of 1 to 16.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
 
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**AMD GPU Specific Optimization Considerations:**
+When analyzing and providing optimization suggestions, consider these critical AMD GPU characteristics:
+1. AMD GPU wavefront size of 64 threads (different from NVIDIA's 32 threads) - ensure your block sizes are multiples of 64 for optimal occupancy
+2. Memory coalescing patterns optimal for AMD architecture - sequential threads should access sequential memory locations
+3. Shared memory bank conflicts which are more critical on AMD GPUs - use appropriate access patterns to avoid conflicts
+4. Register usage optimization to avoid spills - keep register usage low to prevent performance degradation
+5. Appropriate block sizes that align with AMD GPU architecture for better occupancy
 """
 
 prompt_exe_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
-Runnable test is used to test if the code can be successfully executed.
-Correctness test is used to test if the output of the code is correct, i.e. if the code does implement the functionality required in the original problem.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. Analyze the failed test cases and provide detailed insights on why the solution failed and how it could be improved. Be specific about the issues found and provide actionable recommendations.
+
+Different types of tests have been run:
+- Runnable test: Checks if the code can be successfully executed (compiles and runs without crashing)
+- Correctness test: Checks if the output of the code is correct (implements the required functionality)
 
 **Original problem:**
 
@@ -167,22 +214,31 @@ Correctness test is used to test if the output of the code is correct, i.e. if t
 
 {exe_test_result}
 
+**Thinking Process:**
+Before providing your reflection, think through the following steps:
+1. Identify the type of failure (syntax error, runtime error, correctness issue, performance issue)
+2. Locate the specific part of the code causing the failure
+3. Analyze why this part is problematic in the context of AMD GPU architecture
+4. Propose specific fixes or improvements
+
 **Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the reflection. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
+**Performance Optimization Strategy:**
+Maximize performance by exploring the following areas:
+i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps - find optimal values for AMD GPU architecture.
+ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability.
+iii. Exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
+**Primary Autotuning Fields (Mandatory)**
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
    * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+     * BLOCK: [32, 64, 128, 256, 512] - optimal values for AMD GPU wavefront efficiency
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
@@ -197,30 +253,20 @@ Primary Autotuning Fields (Mandatory)
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
     * You must choose a sweet spot by trying out integer range of 1 to 16.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
 
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**AMD GPU Specific Optimization Considerations:**
+When analyzing and providing optimization suggestions, consider these critical AMD GPU characteristics:
+1. AMD GPU wavefront size of 64 threads (different from NVIDIA's 32 threads) - ensure your block sizes are multiples of 64 for optimal occupancy
+2. Memory coalescing patterns optimal for AMD architecture - sequential threads should access sequential memory locations
+3. Shared memory bank conflicts which are more critical on AMD GPUs - use appropriate access patterns to avoid conflicts
+4. Register usage optimization to avoid spills - keep register usage low to prevent performance degradation
+5. Appropriate block sizes that align with AMD GPU architecture for better occupancy
 """
 
 prompt_ga_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. 
-Analyze this Triton code and its performance(speedup[vs reference kernel] for e.g. (1.6x) and efficiency in TFLOPS or GB/s), and give a summary about the optimization strategy that the code uses.
-Provide insights on how to generate a new code with better performance. 
-You can use optimization strategies such as Memory access efficiency, Hardware resource utilization, IR analysis, Assembly analysis, Kernel occupancy, 
-TorchInductor with Triton tuning knobs and Auto-tunable kernel configurations and environment variables.
+You are an expert in writing and optimizing Triton operators for high-performance GPU programming, especially targeting AMD GPUs with ROCm. 
+Analyze this Triton code and its performance (speedup vs reference kernel, e.g. 1.6x and efficiency in TFLOPS or GB/s), and provide a detailed summary of the optimization strategy that the code uses.
+Provide specific insights on how to generate a new code with better performance. 
 
 **Original problem:**
 
@@ -236,22 +282,31 @@ Speedup: {latency}"
 
 efficiency(TFLOPS, GB/s): {efficiency}
 
+**Thinking Process:**
+Before providing your optimization insights, think through the following steps:
+1. Analyze the current performance bottlenecks
+2. Identify which parts of the code contribute most to the latency
+3. Evaluate how well the code utilizes AMD GPU resources
+4. Suggest specific optimizations that could improve performance
+
 **Important Instructions:**
-- Think before writing the optimization and no more explanation is required after the reflection.
+- Think carefully and thoroughly before writing the optimization insights. No additional explanation is required after the reflection.
 - You should not suggest changes to the name of the function and parameter names, counts, or order.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+- Generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
+**Performance Optimization Strategy:**
+Maximize performance by exploring the following areas:
+i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps - find optimal values for AMD GPU architecture.
+ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability.
+iii. Exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
+**Primary Autotuning Fields (Mandatory)**
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
    * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+     * BLOCK: [32, 64, 128, 256, 512] - optimal values for AMD GPU wavefront efficiency
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
@@ -266,20 +321,12 @@ Primary Autotuning Fields (Mandatory)
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
     * You must choose a sweet spot by trying out integer range of 1 to 16.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
 
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**AMD GPU Specific Optimization Considerations:**
+When analyzing and providing optimization suggestions, consider these critical AMD GPU characteristics:
+1. AMD GPU wavefront size of 64 threads (different from NVIDIA's 32 threads) - ensure your block sizes are multiples of 64 for optimal occupancy
+2. Memory coalescing patterns optimal for AMD architecture - sequential threads should access sequential memory locations
+3. Shared memory bank conflicts which are more critical on AMD GPUs - use appropriate access patterns to avoid conflicts
+4. Register usage optimization to avoid spills - keep register usage low to prevent performance degradation
+5. Appropriate block sizes that align with AMD GPU architecture for better occupancy
 """

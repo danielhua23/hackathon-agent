@@ -23,16 +23,29 @@ class Reflexion_Oneshot(Reflexion):
     """
 
     def __init__(self, model: BaseModel, dataset, corpus_path, mem_file=None):
+        logger.info("Initializing Reflexion_Oneshot agent")
+        logger.info(f"Model: {model.__class__.__name__}")
+        logger.info(f"Dataset size: {len(dataset)}")
+        logger.info(f"Corpus path: {corpus_path}")
+        
         self.model = model
         self.dataset = dataset
         self.memories = []
 
+        logger.info("Initializing instruction retriever")
         self.instruction_retriever = BM25Retriever()
         self.instruction_retriever.process(content_input_path=corpus_path)
+        logger.info("Instruction retriever initialized successfully")
+        
+        logger.info("Initializing code retriever")
         self.code_retriever = BM25Retriever(mode="code")
         self.code_retriever.process(content_input_path=corpus_path)
+        logger.info("Code retriever initialized successfully")
 
+        logger.info("Initializing memories")
         self.memory_init(mem_file)
+        logger.info(f"Memories initialized successfully, count: {len(self.memories)}")
+        logger.info("Reflexion_Oneshot agent initialization completed")
 
     def memory_init(self, mem_file=None):
         class Memory(metaclass=MemoryClassMeta, field_names=["ps", 
@@ -199,8 +212,16 @@ class Reflexion_Oneshot(Reflexion):
         msg = [
             {"role": "user", "content": text},
         ]
-        response = self.model.generate(msg, temperature=temperature)
-        mem.ps.solution = clear_code(response)
+        
+        # 添加模型调用前的日志
+        logger.info(f"Calling model {self.model.__class__.__name__} for {mem.ps.filename}")
+        try:
+            response = self.model.generate(msg, temperature=temperature)
+            mem.ps.solution = clear_code(response)
+            logger.info(f"Successfully generated solution for {mem.ps.filename}")
+        except Exception as e:
+            logger.error(f"Failed to generate solution for {mem.ps.filename}: {str(e)}")
+            raise
 
         return
 
@@ -220,4 +241,12 @@ class Reflexion_Oneshot(Reflexion):
                 "content": reflect_txt
             }
         ]
-        mem.reflection = self.model.generate(reflect_msg, temperature=temperature)
+        
+        # 添加模型调用前的日志
+        logger.info(f"Calling model {self.model.__class__.__name__} for reflection on {mem.ps.filename}")
+        try:
+            mem.reflection = self.model.generate(reflect_msg, temperature=temperature)
+            logger.info(f"Successfully generated reflection for {mem.ps.filename}")
+        except Exception as e:
+            logger.error(f"Failed to generate reflection for {mem.ps.filename}: {str(e)}")
+            raise
