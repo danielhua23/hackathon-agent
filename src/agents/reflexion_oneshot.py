@@ -138,10 +138,14 @@ class Reflexion_Oneshot(Reflexion):
             logger.info(f"\nrun scripts on gpu")
             for mem in tqdm(self.memories[:data_len]):
                 if mem.pass_call:
+                    logger.info(f"{mem.ps.filename} is_pass: {mem.pass_call}")
                     continue
                 is_pass, err_msg = self.dataset.run_single_call(mem.ps)
+                logger.info(f"{mem.ps.filename} is_pass: {is_pass}, err_msg: {err_msg}")
                 if is_pass:
                     mem.pass_call = True
+                    mem.err_msg = None
+                    mem.reflection = None
                 else:
                     mem.pass_call = False
                     mem.err_msg = err_msg
