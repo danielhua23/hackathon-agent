@@ -38,7 +38,7 @@ Based on analysis, the implementation requires these EXACT function signatures:
     *   **`tl.arange`:** Arguments `start` and `end` **must be `tl.constexpr`**.
     *   **Math:** Use functions from `tl.math` where available (e.g., `tl.math.exp`, `tl.math.sqrt`). Check function existence; avoid assuming functions like `tanh` or `log1p` exist if they don't in `tl.math`.
 8.  **Triton Version:** Assume Triton version 3.1.0 or later.
-
+9. If the input is float and double, convert to bf16 precision for calculation; if the input is int, use int8 precision for calculation
 **FINAL VERIFICATION:**
 Before completing, verify:
 1. ALL functions defined in the code have EXACT signatures matching the required function signatures above.
