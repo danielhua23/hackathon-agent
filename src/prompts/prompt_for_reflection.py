@@ -1,285 +1,166 @@
+# Create a clean, ASCII-only Python file containing the 6 prompt strings.
+
+
 prompt = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
+You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and explain
+why the solution failed and how to improve it. Be concrete and specific.
 
 **Original problem:**
-
 {problem}
 
 **Attempted solution:**
-
 {solution}
 
-**Test results:**
-
+**Test results / error logs:**
 {test_result}
 
-**Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
+**Reflection requirements (MUST address succinctly):**
+- Root causes: shapes/strides/dtypes/masks, grid dimension vs tl.program_id, tl.arange constexpr bounds, pointer-mask rank match, out-of-bounds.
+- Triton specifics: correct use of tl.load/tl.store, reduction correctness (associativity, fp32 accumulation), correct tile shapes for tl.dot.
+- Numerical stability: overflow/underflow, eps handling, NaN/Inf creation paths.
+- Concrete fixes: point to exact lines/sections and describe minimal code changes; do NOT change function names.
+- Quick checklist: signatures exact; calls match definitions; no undefined names; grid dims consistent; no CUDA-only APIs.
 
+**Output format:**
+Wrap your reflection ONLY in a fenced block with the tag reflection, for example:
+three backticks + reflection
+<your analysis and fixes>
+three backticks
+No extra commentary outside the block.
 """
 
 prompt_exe = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
-Runnable test is used to test if the code can be successfully executed.
-Correctness test is used to test if the output of the code is correct, i.e. if the code does implement the functionality required in the original problem.
+You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed tests and explain
+why the solution failed and how to fix it. Distinguish between runnability and correctness issues.
+
+Runnable test checks whether the code executes without crashing.
+Correctness test checks whether outputs match the required functionality.
 
 **Original problem:**
-
 {problem}
 
 **Attempted solution:**
-
 {solution}
 
 **Results for runnable test:**
-
 {call_test_result}
 
 **Results for correctness test:**
-
 {exe_test_result}
 
-**Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
+**Reflection requirements (MUST address):**
+- Runnable failures: compilation errors, undefined names, illegal masks, grid/program_id mismatch, invalid tl.arange bounds, CUDA-only usage.
+- Correctness failures: wrong indexing/strides, mask shape mismatch, reduction order/precision, dtype cast issues, boundary conditions.
+- Triton check: tl.load/tl.store masks match pointer shapes; tile sizes align with problem sizes; 1D vs 2D grid used consistently.
+- Minimal, surgical fixes while preserving function names and signatures.
+- Final checklist: signatures exact; call sites 1:1; no placeholders left; numerically stable.
 
+**Output format:**
+Return ONLY a fenced reflection block with your analysis and proposed fixes.
 """
 
 prompt_ga = """
-You are an expert in writing Triton operators for efficient GPU programming. 
-Analyze this Triton code and its performance(latency in ms and efficiency in TFLOPS or GB/s), and give a summary about the optimization strategy that the code uses.
-Provide insights on how to generate a new code with better performance. 
-You can use optimization strategies such as Memory access efficiency, Hardware resource utilization, IR analysis, Assembly analysis, Kernel occupancy, 
-TorchInductor with Triton tuning knobs and Auto-tunable kernel configurations and environment variables.
+You are an expert in writing Triton operators for efficient GPU programming.
+Analyze this Triton code and its performance (latency in ms and efficiency in TFLOPS or GB/s). Summarize the current optimization strategy,
+identify bottlenecks, and propose concrete steps to achieve better performance.
 
 **Original problem:**
-
 {problem}
-   
-**Triton code:**
 
+**Triton code:**
 {code}
 
 **Test results:**
+latency (ms): {latency}
+efficiency (TFLOPS / GB/s): {efficiency}
 
-latency: {latency}"
+**Reflection requirements (MUST address):**
+- Current strategy: tiling/blocking, vectorization, memory access pattern (coalescing, reuse), use of shared/LDS, reduction scheme.
+- Bottlenecks: occupancy (num_warps/num_stages), register pressure/spills, bank conflicts, uncoalesced loads/stores, synchronization overhead.
+- Math precision: fp16/bf16 inputs with fp32 accumulation where needed; stability considerations.
+- Concrete tuning plan: propose 6-12 autotune configs (BLOCK_* / num_warps 1..16 / num_stages 1..3) and expected trade-offs.
+- Actionable changes: 3-5 prioritized edits (e.g., tile sizes, prefetching, pointer arithmetic, mask shaping, software pipelining).
 
-efficiency(TFLOPS, GB/s): {efficiency}
-
-**Important Instructions:**
-- Think before writing the optimization and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function and parameter names, counts, or order.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
-
+**Constraints:**
+- Do NOT suggest changing function names or parameter lists/order.
+- Output ONLY a fenced reflection block.
 """
 
 prompt_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
+You are an expert in writing Triton operators for efficient GPU programming on AMD ROCm. Analyze the failed test cases and explain
+why the solution failed and how to improve it, focusing on ROCm compatibility and Triton best practices.
 
 **Original problem:**
-
 {problem}
 
 **Attempted solution:**
-
 {solution}
 
-**Test results:**
-
+**Test results / error logs:**
 {test_result}
 
-**Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
+**Reflection requirements (MUST address):**
+- ROCm-specific pitfalls: any CUDA-only intrinsics/APIs, unsupported libdevice calls, wavefront-size assumptions.
+- Grid/ID: ensure launch grid dimensionality matches tl.program_id usage; avoid reading non-existent dimensions.
+- Triton semantics: tl.arange bounds as tl.constexpr; pointer arithmetic and masks rank alignment; out-of-bounds prevention.
+- Numerics: fp32 accumulation for reductions; stability (log-sum-exp, eps).
+- Concrete code fixes (no function renames), with brief line/section references.
+- Final checklist: signatures exact; calls match defs; no undefined names; ROCm-compatible; masks correct.
 
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
-1. BLOCK_M, BLOCK_N, BLOCK_K
-   * Tile sizes for GEMM or other tensor contractions.
-   * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
-   * Adjust based on memory reuse and L2 cache locality.
-2. num_stages=n
-   * Controls pipeline depth for kernel execution.
-   * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
-   * Optimize for latency and execution overlap.
-3. num_warps
-    * Controls number of warps (groups of 64 threads) to launch per block.
-    * If it is too low then underutilization -> kernel runs slow.
-    * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
-    * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
-
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**Output format:**
+Only return a fenced reflection block with your analysis and fixes.
 """
 
 prompt_exe_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
-on why the solution failed and how it could be improved. Be specific about the issues found.
-Runnable test is used to test if the code can be successfully executed.
-Correctness test is used to test if the output of the code is correct, i.e. if the code does implement the functionality required in the original problem.
+You are an expert in writing Triton operators for efficient GPU programming on AMD ROCm. Analyze the failed tests and clearly separate
+runnability issues from correctness issues. Provide precise fixes without renaming functions.
+
+Runnable test verifies successful execution. Correctness test verifies functional equivalence.
 
 **Original problem:**
-
 {problem}
 
 **Attempted solution:**
-
 {solution}
 
 **Results for runnable test:**
-
 {call_test_result}
 
 **Results for correctness test:**
-
 {exe_test_result}
 
-**Important Instructions:**
-- Think before writing the reflection and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
+**Reflection requirements (MUST address):**
+- ROCm runnability: remove CUDA-only features; ensure tl.arange constexpr; fix grid vs program_id dimensionality; valid masks/pointers.
+- Correctness: tile sizes vs shapes, stride math, dtype casts, fp32 accumulation, boundary handling, reduction associativity.
+- Autotuning readiness: meta-params used in triton.Config must NOT be runtime kernel args; ensure compile-time tl.constexpr.
+- Provide minimal edits (no function renames) and a quick validation checklist.
 
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
-1. BLOCK_M, BLOCK_N, BLOCK_K
-   * Tile sizes for GEMM or other tensor contractions.
-   * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
-   * Adjust based on memory reuse and L2 cache locality.
-2. num_stages=n
-   * Controls pipeline depth for kernel execution.
-   * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
-   * Optimize for latency and execution overlap.
-3. num_warps
-    * Controls number of warps (groups of 64 threads) to launch per block.
-    * If it is too low then underutilization -> kernel runs slow.
-    * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
-    * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
-
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**Output format:**
+Respond ONLY with a fenced reflection block.
 """
 
 prompt_ga_rocm = """
-You are an expert in writing Triton operators for efficient GPU programming. 
-Analyze this Triton code and its performance(speedup[vs reference kernel] for e.g. (1.6x) and efficiency in TFLOPS or GB/s), and give a summary about the optimization strategy that the code uses.
-Provide insights on how to generate a new code with better performance. 
-You can use optimization strategies such as Memory access efficiency, Hardware resource utilization, IR analysis, Assembly analysis, Kernel occupancy, 
-TorchInductor with Triton tuning knobs and Auto-tunable kernel configurations and environment variables.
+You are an expert in writing Triton operators for efficient GPU programming on AMD ROCm.
+Explain the code performance (speedup vs reference and TFLOPS/GB/s), the optimization strategy used, and how to improve it further on ROCm.
 
 **Original problem:**
-
 {problem}
-   
-**Triton code:**
 
+**Triton code:**
 {code}
 
 **Test results:**
+Speedup (x): {latency}
+efficiency (TFLOPS / GB/s): {efficiency}
 
-Speedup: {latency}"
+**Reflection requirements (MUST address):**
+- Current strategy and ROCm fit: tiling/block sizes vs wavefront 64, LDS usage and padding, vectorized IO, prefetching.
+- Bottlenecks: occupancy (num_warps/num_stages), register pressure/spills, memory divergence, bank conflicts, synchronization cost.
+- Autotune proposal: 6-12 configs over BLOCK_M/N/K (or BLOCK_SIZE), num_warps in [1..16], num_stages in {1,2,3}; justify ranges for ROCm.
+- Concrete steps: 3-5 prioritized edits with expected impact (e.g., better coalescing, tile re-shaping, software pipelining, on-the-fly dequant).
+- Keep function signatures and parameter lists/order unchanged.
 
-efficiency(TFLOPS, GB/s): {efficiency}
-
-**Important Instructions:**
-- Think before writing the optimization and no more explanation is required after the reflection.
-- You should not suggest changes to the name of the function and parameter names, counts, or order.
-- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
-"```markdown<your reflections>```"
-
-Maximize performance by exploring the following:
-i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
-ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
-iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
-Primary Autotuning Fields (Mandatory)
-1. BLOCK_M, BLOCK_N, BLOCK_K
-   * Tile sizes for GEMM or other tensor contractions.
-   * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
-   * Adjust based on memory reuse and L2 cache locality.
-2. num_stages=n
-   * Controls pipeline depth for kernel execution.
-   * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
-   * Optimize for latency and execution overlap.
-3. num_warps
-    * Controls number of warps (groups of 64 threads) to launch per block.
-    * If it is too low then underutilization -> kernel runs slow.
-    * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
-    * You MUST NOT try the range beyond 16, it is NOT VALID. 
-Examples of Autotuning Setup
-Here's how Triton kernels should be decorated to allow autotuning:
-    * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
-    * BLOCK_M refers to the chunk of variable M that will be used for compute by a thread at a time.
-    * You must ensure that variables used in the triton.Config should not be passed as arguments to the triton kernel.
-For example: the following autotune config receives BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K, GROUP_SIZE_M, num_warps, and num_stages as input arguments. Hence the triton kernel must not receive these arguments as inputs in the wrapper function. You must comment/delete any such instances.
-
-NOTE: If you face kernel timeout issues, check if Grid and Program ID Mismatch exists or not for example The kernel is launched with a 1-dimensional (1D) grid, but inside the kernel, it attempts to read program IDs from a 2-dimensional (2D) grid etc.
-
-def grid(args: dict[str, Any]) -> tuple[int]:
-    # This creates a 1D grid of size (C * D, )
-    return (triton.cdiv(M, args["BLOCK_SIZE_M"]) * triton.cdiv(N, args["BLOCK_SIZE_N"]), )
-
-The grid is calculated as a single integer, creating a 1D grid, however the kernel might try to get two separate program IDs, pid_m and pid_n, as if it were a 2D grid:
-pid_m = tl.program_id(0)  # Gets the ID for the first dimension
-pid_n = tl.program_id(1)  # Tries to get ID for a non-existent second dimension
+**Output format:**
+ONLY return a fenced reflection block.
 """
+
