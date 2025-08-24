@@ -10,10 +10,9 @@ from args_config import load_config
 def main():
     args = load_config("configs/tritonbench_oneshot_config.yaml")
 
-    # For a quick test, let's limit the number of iterations and kernels
-    args.max_iteration = 3
-    test_cases_to_run = 2
-    print(f"--- RUNNING WITH A TEST CONFIG: max_iteration = {args.max_iteration}, kernels = {test_cases_to_run} ---")
+    # Set up for a full competition run
+    args.max_iteration = 5
+    print(f"--- RUNNING FULL PIPELINE: max_iteration = {args.max_iteration} ---")
 
     # setup LLM model
     model = KimiK2Model(api_key=args.api_key, model_id=args.model_id)
@@ -39,7 +38,7 @@ def main():
             multi_thread=True,
             iteration_num=args.max_iteration, 
             temperature=args.temperature,
-            datalen=test_cases_to_run)
+            datalen=None) # Set to None to run on all kernels
 
 
 if __name__ == "__main__":
