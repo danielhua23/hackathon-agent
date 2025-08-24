@@ -17,6 +17,7 @@ on why the solution failed and how it could be improved. Be specific about the i
 **Important Instructions:**
 - Think before writing the reflection and no more explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
+- Please check all variable names. Pay special attention not to write Mid_O when using the MID_O variable
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
@@ -47,6 +48,7 @@ Correctness test is used to test if the output of the code is correct, i.e. if t
 **Important Instructions:**
 - Think before writing the reflection and no more explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
+- Please check all variable names. Pay special attention not to write Mid_O when using the MID_O variable
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
@@ -100,6 +102,7 @@ on why the solution failed and how it could be improved. Be specific about the i
 **Important Instructions:**
 - Think before writing the reflection and no more explanation is required after the reflection.
 - You should not suggest changes to the name of the function.
+- Please check all variable names. Pay special attention not to write Mid_O when using the MID_O variable
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
@@ -239,6 +242,7 @@ efficiency(TFLOPS, GB/s): {efficiency}
 **Important Instructions:**
 - Think before writing the optimization and no more explanation is required after the reflection.
 - You should not suggest changes to the name of the function and parameter names, counts, or order.
+- Please check all variable names. Pay special attention not to write Mid_O when using the MID_O variable
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
