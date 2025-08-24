@@ -1,0 +1,92 @@
+[
+    {
+        "pass_num": 0,
+        "file_name": "matrix_vector_multip.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "triton_matmul.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "embedding_triton_kernel.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "int4_matmul.py",
+        "call_status": 1,
+        "exec_status": 0,
+        "stdout": "None",
+        "stderr": "Generated output does not match reference output for file: int4_matmul.py_gen_triton_code_415247.py",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "flash_decode2_phi.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "matrix_transpose.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "rotary_transform.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "sin_kernel.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "l2_norm_bwd.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    },
+    {
+        "pass_num": 0,
+        "file_name": "l2_norm_triton1.py",
+        "call_status": 1,
+        "exec_status": 1,
+        "stdout": "None",
+        "stderr": "None",
+        "difficulty": -1
+    }
+]
