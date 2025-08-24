@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_44150 due to at 27:24:
+        return
+
+    seqlen_offset = 0
+    if IS_VARIABLE:
+        seqlen_offset = tl.load(SEQLENS_OFFSETS + pid_batch)
+        seq_len = tl.load(CU_SEQLENS + pid_batch + 1) - tl.load(CU_SEQLENS + pid_batch)
+        if pid_m >= seq_len:
+            return
+    else:
+        if SEQLEN is not None and pid_m >= SEQLEN:
+            return
+        seqlen_offset = tl.load(SEQLENS_OFFSETS + pid_batch) if SEQLENS_OFFSETS else 0
+                        ^
+AssertionError('ternary expression with dynamic condition has inconsistent types int64 and int32')

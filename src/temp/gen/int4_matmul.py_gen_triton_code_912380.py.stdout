@@ -1,0 +1,1 @@
+False*#*#None*#*#None*#*#Could not execute module int4_matmul.py_gen_triton_code_912380 due to Index put requires the source and destination dtypes match, got Int for the destination and Byte for the source.

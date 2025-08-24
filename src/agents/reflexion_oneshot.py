@@ -78,7 +78,16 @@ class Reflexion_Oneshot(Reflexion):
     def run(self, output_path=None, multi_thread=True, verbose=False, datalen=None, iteration_num=0, temperature=0):
         data_len = datalen if datalen else len(self.dataset)
         for iter in range(iteration_num):
+            # Filter only failed kernels for this iteration (correctness check)
+            failed_memories = [mem for mem in self.memories[:data_len] if not mem.pass_call]
+            
+            if not failed_memories:
+                logger.info(f"\n=== All kernels passed, stopping at iteration {iter} ===")
+                break
+                
             logger.info(f"\n=== Iteration {iter} ===")
+            logger.info(f"Processing {len(failed_memories)} failed kernels out of {data_len} total")
+            
             if output_path is not None:
                 root, extension = os.path.splitext(output_path)
                 iter_path = f"{root}_{iter}{extension}"
@@ -86,50 +95,38 @@ class Reflexion_Oneshot(Reflexion):
             if multi_thread:
                 thread_num = 3
             
-            # generate solution
-            logger.info(f"\ngenerate solution")
-            with tqdm(total=data_len) as pbar:
+            # generate solution for failed kernels only
+            logger.info(f"\ngenerate solution for failed kernels")
+            with tqdm(total=len(failed_memories)) as pbar:
                 if multi_thread:
-                    
                     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-                        futures = {executor.submit(self.generate_solution, mem, temperature): mem for mem in self.memories[:data_len]}
+                        futures = {executor.submit(self.generate_solution, mem, temperature): mem for mem in failed_memories}
                         for future in as_completed(futures):
                             pbar.update(1)
                 else:
-                    for mem in self.memories[:data_len]:
+                    for mem in failed_memories:
                         self.generate_solution(mem, temperature=temperature)
                         pbar.update(1)
             
-            """
-            Run the scripts to verify whether the generated kernels can execute without errors.
-            To check for correctness against expected outputs, use the test_opt_correctness method from TritonBench:
-
-            if self.config.agent.output_path is not None:
-                    root, extension = os.path.splitext(self.config.agent.output_path)
-                    tmp_dir = f"{root}_tmp_{n}"
-                    exe_dir = f"{root}_pass_exe_{n}"
-                    perf_result_dir = f"{root}_perf_results_{n}"
-                    perf_log_dir = f"{root}_perf_logs_{n}"
-
-                else:
-                    tmp_dir = f"tmp_{n}"
-                    exe_dir = f"pass_exe_{n}"
-                    perf_result_dir = f"perf_results_{n}"
-                    perf_log_dir = f"perf_logs_{n}"
-
-                for fn, mems in tqdm(current_memories.items()):
-                    mem = mems[n]
-                    try:
-                        pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(mem.code, mem.ps.filename, tmp_dir, exe_dir=exe_dir)
-            
-            """
-            logger.info(f"\nrun scripts on gpu")
-            for mem in tqdm(self.memories[:data_len]):
-                if mem.pass_call:
+            logger.info(f"\nrun correctness tests on gpu")
+            for mem in tqdm(failed_memories):
+                try:
+                    pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr = self.dataset.test_opt_correctness(
+                        mem.ps.solution, mem.ps.filename, "temp", exe_dir="pass_exe"
+                    )
+                except Exception as e:
+                    logger.info(f"failed to test the code due to : {e}")
+                    mem.err_msg = f"failed to test the code due to: {e}"
                     continue
-                is_pass, err_msg = self.dataset.run_single_call(mem.ps)
-                if not is_pass:
-                    mem.err_msg = err_msg
+                
+                if not pass_call:
+                    mem.err_msg = call_stderr
+                elif not pass_exe:
+                    mem.err_msg = exe_stderr
+                else:
+                    # Both call and execution passed - mark as successful
+                    mem.pass_call = True
+                    mem.err_msg = None  # Clear previous error
             """
             To measure kernel latency, follow these steps:
 
@@ -152,16 +149,17 @@ class Reflexion_Oneshot(Reflexion):
 
             """
 
-            # generate reflections
-            logger.info(f"\ngenerate reflections")
-            with tqdm(total=data_len) as pbar:
+            # generate reflections for failed kernels only
+            logger.info(f"\ngenerate reflections for failed kernels")
+            still_failed_memories = [mem for mem in failed_memories if not mem.pass_call]
+            with tqdm(total=len(still_failed_memories)) as pbar:
                 if multi_thread:
                     with ThreadPoolExecutor(max_workers=thread_num) as executor:
-                        futures = {executor.submit(self.generate_reflexion, mem, temperature): mem for mem in self.memories[:data_len]}
+                        futures = {executor.submit(self.generate_reflexion, mem, temperature): mem for mem in still_failed_memories}
                         for future in as_completed(futures):
                             pbar.update(1)
                 else:
-                    for mem in self.memories[:data_len]:
+                    for mem in still_failed_memories:
                         self.generate_reflexion(mem, temperature=temperature)
                         pbar.update(1)
             
@@ -172,6 +170,7 @@ class Reflexion_Oneshot(Reflexion):
     
     def generate_solution(self, mem, temperature=0):
         if mem.pass_call:
+            logger.debug(f"Skipping {mem.ps.filename} - already passed")
             return
         
         # tab = "\n"
@@ -208,6 +207,7 @@ class Reflexion_Oneshot(Reflexion):
 
     def generate_reflexion(self, mem, temperature):
         if mem.pass_call:
+            logger.debug(f"Skipping reflection for {mem.ps.filename} - already passed")
             return
         reflect_txt = prompt_for_reflection.prompt.format(
             problem=mem.ps.instruction,

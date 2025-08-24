@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_373163 due to at 106:14:
+        sin_imag = tl.load(SIN + off_sin_imag, mask=mask_m[:, None], other=0.0)
+
+    else:
+        # Non-interleaved format: first half is real, second half is imag
+        half_k = HEAD_K // 2
+
+        # Offsets for real and imaginary parts
+        off_real = (
+            pid_batch * stride_x_batch
+            + pid_head[None, :] * stride_x_head
+            + pid_m[:, None] * stride_x_m
+            + tl.arange(0, half_k)[None, :] * stride_x_k
+              ^

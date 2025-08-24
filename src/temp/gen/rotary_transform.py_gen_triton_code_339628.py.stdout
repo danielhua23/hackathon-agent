@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_339628 due to at 60:22:
+
+    if IS_SEQLEN_OFFSETS_TENSOR:
+        seqlen_offset = tl.load(SEQLEN_OFFSETS + pid_batch)
+    else:
+        seqlen_offset = SEQLEN_OFFSETS
+
+    rk_half = tl.arange(0, BLOCK_K // 2)
+    rk_full = tl.arange(0, BLOCK_K)
+
+    if not INTERLEAVED:
+        # Non-interleaved
+        cos_offset = (rm[:, None] + seqlen_offset) * rotary_dim + rk_half[None, :]
+                      ^
+AssertionError("cannot convert None of type <class 'NoneType'> to tensor")

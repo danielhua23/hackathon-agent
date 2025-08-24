@@ -103,30 +103,67 @@ on why the solution failed and how it could be improved. Be specific about the i
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**Performance Analysis Framework:**
+Analyze the code against these performance patterns based on empirical evidence from high vs low performance kernels:
+
+1. **Algorithmic Efficiency:**
+   - Does it use optimal algorithms (online softmax vs naive)?
+   - Are reduction operations single-pass (avoid loops with tl.sum/tl.max)?
+   - Is there unnecessary data movement (element-wise vs block operations)?
+
+2. **Memory Efficiency:**
+   - Are memory access patterns coalesced (vectorized loads/stores)?
+   - Is shared memory utilized effectively (block sizes 32, 64, 128)?
+   - Are there redundant loads/stores (multiple passes vs single-pass)?
+
+3. **Compute Efficiency:**
+   - Are vectorized operations used instead of scalar loops?
+   - Is the compute-to-memory ratio optimized (MAX_FUSED = 65536 // element_size)?
+   - Are warp-level operations utilized (tl.dot, .trans())?
+
+4. **Specific Kernel Patterns:**
+   - **Reduction kernels:** Use single-pass with tl.sum/tl.max, avoid loops
+   - **Transpose kernels:** Use .trans() for block operations, not element-wise
+   - **MatMul kernels:** Optimize BLOCK_M/N/K for cache locality (64, 128)
+   - **Flash kernels:** Use online algorithms, vectorized exp operations
+
+5. **Parameter Optimization:**
+   - Are BLOCK_SIZE parameters optimal (32, 64, 128 proven effective)?
+   - Are num_warps/num_stages tuned (4-8 for compute, 8-16 for memory)?
+   - Is grid configuration efficient (avoid complex GROUP_SIZE_M)?
+
+Common Performance Anti-patterns to Avoid:
+1. Two-pass reduction when single-pass is possible
+2. Element-wise operations instead of block operations
+3. Small BLOCK_SIZE (16) when larger (32, 64) is better
+4. Complex grid configurations when simple ones suffice
+5. Scalar loops instead of vectorized operations
+
 Maximize performance by exploring the following:
 i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
 ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
 iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
 Primary Autotuning Fields (Mandatory)
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+   * Explore proven effective ranges: [32, 64, 128] based on empirical evidence
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
    * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
+     * 1 if no GEMM or memory-bound
+     * 2 if a single GEMM (e.g., GEMM + ReLU)
+     * 1 if two GEMMs are fused (e.g., Flash Attention)
    * Optimize for latency and execution overlap.
 3. num_warps
     * Controls number of warps (groups of 64 threads) to launch per block.
     * If it is too low then underutilization -> kernel runs slow.
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
+    * You must choose a sweet spot by trying out integer range of 4 to 8 for compute-bound, 8 to 16 for memory-bound.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
+
 Examples of Autotuning Setup
 Here's how Triton kernels should be decorated to allow autotuning:
     * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
@@ -173,30 +210,67 @@ Correctness test is used to test if the output of the code is correct, i.e. if t
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**Performance Analysis Framework:**
+Analyze the code against these performance patterns based on empirical evidence from high vs low performance kernels:
+
+1. **Algorithmic Efficiency:**
+   - Does it use optimal algorithms (online softmax vs naive)?
+   - Are reduction operations single-pass (avoid loops with tl.sum/tl.max)?
+   - Is there unnecessary data movement (element-wise vs block operations)?
+
+2. **Memory Efficiency:**
+   - Are memory access patterns coalesced (vectorized loads/stores)?
+   - Is shared memory utilized effectively (block sizes 32, 64, 128)?
+   - Are there redundant loads/stores (multiple passes vs single-pass)?
+
+3. **Compute Efficiency:**
+   - Are vectorized operations used instead of scalar loops?
+   - Is the compute-to-memory ratio optimized (MAX_FUSED = 65536 // element_size)?
+   - Are warp-level operations utilized (tl.dot, .trans())?
+
+4. **Specific Kernel Patterns:**
+   - **Reduction kernels:** Use single-pass with tl.sum/tl.max, avoid loops
+   - **Transpose kernels:** Use .trans() for block operations, not element-wise
+   - **MatMul kernels:** Optimize BLOCK_M/N/K for cache locality (64, 128)
+   - **Flash kernels:** Use online algorithms, vectorized exp operations
+
+5. **Parameter Optimization:**
+   - Are BLOCK_SIZE parameters optimal (32, 64, 128 proven effective)?
+   - Are num_warps/num_stages tuned (4-8 for compute, 8-16 for memory)?
+   - Is grid configuration efficient (avoid complex GROUP_SIZE_M)?
+
+Common Performance Anti-patterns to Avoid:
+1. Two-pass reduction when single-pass is possible
+2. Element-wise operations instead of block operations
+3. Small BLOCK_SIZE (16) when larger (32, 64) is better
+4. Complex grid configurations when simple ones suffice
+5. Scalar loops instead of vectorized operations
+
 Maximize performance by exploring the following:
 i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
 ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
 iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
 Primary Autotuning Fields (Mandatory)
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+   * Explore proven effective ranges: [32, 64, 128] based on empirical evidence
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
    * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
+     * 1 if no GEMM or memory-bound
+     * 2 if a single GEMM (e.g., GEMM + ReLU)
+     * 1 if two GEMMs are fused (e.g., Flash Attention)
    * Optimize for latency and execution overlap.
 3. num_warps
     * Controls number of warps (groups of 64 threads) to launch per block.
     * If it is too low then underutilization -> kernel runs slow.
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
+    * You must choose a sweet spot by trying out integer range of 4 to 8 for compute-bound, 8 to 16 for memory-bound.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
+
 Examples of Autotuning Setup
 Here's how Triton kernels should be decorated to allow autotuning:
     * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.
@@ -242,30 +316,67 @@ efficiency(TFLOPS, GB/s): {efficiency}
 - generate the reflection wrapped in a code block with the tag `reflection`, e.g.
 "```markdown<your reflections>```"
 
+**Performance Analysis Framework:**
+Analyze the code against these performance patterns based on empirical evidence from high vs low performance kernels:
+
+1. **Algorithmic Efficiency:**
+   - Does it use optimal algorithms (online softmax vs naive)?
+   - Are reduction operations single-pass (avoid loops with tl.sum/tl.max)?
+   - Is there unnecessary data movement (element-wise vs block operations)?
+
+2. **Memory Efficiency:**
+   - Are memory access patterns coalesced (vectorized loads/stores)?
+   - Is shared memory utilized effectively (block sizes 32, 64, 128)?
+   - Are there redundant loads/stores (multiple passes vs single-pass)?
+
+3. **Compute Efficiency:**
+   - Are vectorized operations used instead of scalar loops?
+   - Is the compute-to-memory ratio optimized (MAX_FUSED = 65536 // element_size)?
+   - Are warp-level operations utilized (tl.dot, .trans())?
+
+4. **Specific Kernel Patterns:**
+   - **Reduction kernels:** Use single-pass with tl.sum/tl.max, avoid loops
+   - **Transpose kernels:** Use .trans() for block operations, not element-wise
+   - **MatMul kernels:** Optimize BLOCK_M/N/K for cache locality (64, 128)
+   - **Flash kernels:** Use online algorithms, vectorized exp operations
+
+5. **Parameter Optimization:**
+   - Are BLOCK_SIZE parameters optimal (32, 64, 128 proven effective)?
+   - Are num_warps/num_stages tuned (4-8 for compute, 8-16 for memory)?
+   - Is grid configuration efficient (avoid complex GROUP_SIZE_M)?
+
+Common Performance Anti-patterns to Avoid:
+1. Two-pass reduction when single-pass is possible
+2. Element-wise operations instead of block operations
+3. Small BLOCK_SIZE (16) when larger (32, 64) is better
+4. Complex grid configurations when simple ones suffice
+5. Scalar loops instead of vectorized operations
+
 Maximize performance by exploring the following:
 i. Autotuning key parameters BLOCK_SIZE, num_stages, num_warps. 
 ii. Better algorithmic implementation (e.g., naive softmax vs online softmax vs fused softmax), better memory access patterns and numerical stability. 
 iii. exploring all possible operator fusion strategies within the kernel while adhering to resource constraints.
+
 Primary Autotuning Fields (Mandatory)
 1. BLOCK_M, BLOCK_N, BLOCK_K
    * Tile sizes for GEMM or other tensor contractions.
    * Larger blocks improve compute density, but reduce grid-level parallelism.
-   * Explore wide range of values like:
-     * BLOCK: [32, ..., 128, ..., 2048, ...] 
+   * Explore proven effective ranges: [32, 64, 128] based on empirical evidence
    * Adjust based on memory reuse and L2 cache locality.
 2. num_stages=n
    * Controls pipeline depth for kernel execution.
    * Rules for setting this:
-     * 1 if no GEMM.
-     * 2 if a single GEMM (e.g., GEMM + ReLU).
-     * 1 if two GEMMs are fused (e.g., Flash Attention).
+     * 1 if no GEMM or memory-bound
+     * 2 if a single GEMM (e.g., GEMM + ReLU)
+     * 1 if two GEMMs are fused (e.g., Flash Attention)
    * Optimize for latency and execution overlap.
 3. num_warps
     * Controls number of warps (groups of 64 threads) to launch per block.
     * If it is too low then underutilization -> kernel runs slow.
     * If it is too high then register spill happens and shared memory is overused -> kernel runs slow.
-    * You must choose a sweet spot by trying out integer range of 1 to 16.
+    * You must choose a sweet spot by trying out integer range of 4 to 8 for compute-bound, 8 to 16 for memory-bound.
     * You MUST NOT try the range beyond 16, it is NOT VALID. 
+
 Examples of Autotuning Setup
 Here's how Triton kernels should be decorated to allow autotuning:
     * key argument indicates the variables that change and trigger autotune to re-run. This is a must argument and you must not miss this.

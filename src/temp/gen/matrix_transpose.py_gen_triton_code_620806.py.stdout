@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module matrix_transpose.py_gen_triton_code_620806 due to at 14:39:
+    Out,
+    matrix_stridex,
+    matrix_stridey,
+    out_stridex,
+    out_stridey,
+    SIZE_M: tl.constexpr,
+    D_HEAD: tl.constexpr,
+):
+    pid_m = tl.program_id(0)
+    pid_n = tl.program_id(1)
+
+    BLOCK_SIZE_M = tl.program_id(2) if hasattr(tl.program_id, '__call__') else 32
+                                       ^
+NameError('hasattr is not defined')

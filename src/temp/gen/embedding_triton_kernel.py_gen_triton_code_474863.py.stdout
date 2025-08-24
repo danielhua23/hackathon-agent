@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module embedding_triton_kernel.py_gen_triton_code_474863 due to at 24:19:
+    start_token = pid * BLOCK_NN
+    offs_d = pid_d * BLOCK_DMODEL + tl.arange(0, BLOCK_DMODEL)
+    tok_idx = start_token + tl.arange(0, BLOCK_NN)
+
+    mask_t = tok_idx < num_tokens
+    mask_d = offs_d < (stride_w * 1)          # stride_w is row-stride (D)
+
+    ids_vec = tl.load(ids + tok_idx, mask=mask_t)
+
+    for i in range(BLOCK_NN):
+        valid_tok = (start_token + i) < num_tokens
+        token_id = ids_vec[i]                # scalar token-id
+                   ^
+ValueError('Did you forget to add @triton.jit ? (`_builder` argument must be provided outside of JIT functions.)')

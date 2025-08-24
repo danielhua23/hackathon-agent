@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module matrix_transpose.py_gen_triton_code_114093 due to at 22:22:
+):
+    pid = tl.program_id(0)
+    n_rows = SIZE_M
+    n_cols = D_HEAD
+
+    num_tasks = n_rows * n_cols
+    for i in range(pid, num_tasks, BLOCK_SIZE):
+        if i < num_tasks:
+            row = i // n_cols
+            col = i % n_cols
+
+            in_ptr  = M  + tl.make_block_ptr(
+                      ^
+IncompatibleTypeErrorImpl('invalid operands of type pointer<fp16> and pointer<<[1, 1], fp16>>')

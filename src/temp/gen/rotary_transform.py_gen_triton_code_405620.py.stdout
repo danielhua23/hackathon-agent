@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_405620 due to at 76:9:
+
+    # Load cosine and sine values
+    if IS_EVEN_K:
+        cos = tl.load(cos_base + offset_d, mask=offset_d < rotary_dim)
+        sin = tl.load(sin_base + offset_d, mask=offset_d < rotary_dim)
+    else:
+        mask_d = offset_d < rotary_dim
+        cos = tl.load(cos_base + offset_d, mask=mask_d)
+        sin = tl.load(sin_base + offset_d, mask=mask_d)
+
+    # Split into two halves
+    x0 = x_rot[:rot_dim_half] if rotary_dim <= BLOCK_K else x_rot[0:rot_dim_half:2] if interleaved else x_rot[:rot_dim_half]
+         ^
+ValueError('unsupported tensor index: slice(None, <triton.language.core.tensor object at 0x741956810ce0>, None)')

@@ -1,0 +1,14 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_460195 due to at 90:22:
+        if CONJUGATE:
+            sin = -sin
+
+        o0 = x0 * cos - x1 * sin
+        o1 = x0 * sin + x1 * cos
+
+        tl.store(out_ptr + rm[:, None] * stride_out_seqlen + rk_half[None, :] * stride_out_headdim,
+                 o0, mask=mask_m & mask_k_half)
+        tl.store(out_ptr + rm[:, None] * stride_out_seqlen + (rk_half + rotary_dim_half)[None, :] * stride_out_headdim,
+                 o1, mask=mask_m & mask_k_half)
+    else:
+        rk_even = 2 * tl.arange(0, rotary_dim_half)
+                      ^

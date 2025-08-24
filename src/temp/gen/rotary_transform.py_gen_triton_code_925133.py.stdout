@@ -1,0 +1,15 @@
+False*#*#None*#*#None*#*#Could not execute module rotary_transform.py_gen_triton_code_925133 due to at 42:41:
+    rotary_dim_half = rotary_dim // 2
+
+    if not IS_VARLEN:
+        x_ptr = X + pid_batch * stride_x_batch + pid_head * stride_x_nheads
+        o_ptr = OUT + pid_batch * stride_out_batch + pid_head * stride_out_nheads
+    else:
+        start_idx = tl.load(CU_SEQLENS + pid_batch)
+        seq_len = tl.load(CU_SEQLENS + pid_batch + 1) - start_idx
+        x_ptr = X + start_idx * stride_x_seqlen + pid_head * stride_x_nheads
+        o_ptr = OUT + start_idx * stride_out_seqlen + pid_head * stride_out_nheads
+    else_seq_len = seqlen
+    current_seqlen = tl.where(IS_VARLEN, seq_len, else_seq_len)
+                                         ^
+NameError('seq_len is not defined')

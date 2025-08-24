@@ -39,6 +39,31 @@ Based on analysis, the implementation requires these EXACT function signatures:
     *   **Math:** Use functions from `tl.math` where available (e.g., `tl.math.exp`, `tl.math.sqrt`). Check function existence; avoid assuming functions like `tanh` or `log1p` exist if they don't in `tl.math`.
 8.  **Triton Version:** Assume Triton version 3.1.0 or later.
 
+**Performance Optimization Guidelines:**
+Based on analysis of high-performance kernels, follow these patterns:
+
+1. **Reduction Operations (L2 Norm, Softmax):**
+   - Use single-pass reduction when possible
+   - Leverage vectorized operations (tl.sum, tl.max) instead of loops
+   - Calculate optimal BLOCK_SIZE based on hardware limits (MAX_FUSED = 65536 // element_size)
+   - Use online algorithms to avoid multiple passes
+
+2. **Matrix Operations (Transpose, MatMul):**
+   - Use block-wise operations instead of element-wise
+   - Optimize BLOCK_SIZE for cache locality (32, 64, 128)
+   - Ensure coalesced memory access patterns
+   - Use `.trans()` for transpose operations when possible
+
+3. **Memory Access Patterns:**
+   - Prefer vectorized loads/stores over scalar operations
+   - Use appropriate masks for boundary conditions
+   - Minimize memory transactions through data reuse
+
+4. **Autotuning Parameters:**
+   - BLOCK_SIZE: [32, 64, 128] for most operations
+   - num_warps: 4-8 for compute-bound, 8-16 for memory-bound
+   - num_stages: 2 for GEMM, 1 for memory-bound kernels
+
 **FINAL VERIFICATION:**
 Before completing, verify:
 1. ALL functions defined in the code have EXACT signatures matching the required function signatures above.
