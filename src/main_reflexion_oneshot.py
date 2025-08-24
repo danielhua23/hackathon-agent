@@ -30,6 +30,8 @@ def main():
     # run the agent
     agent.run(output_path=args.output_path, multi_thread=args.multi_thread, iteration_num=args.max_iteration, temperature=args.temperature, datalen=None)
 
+    # save memory for further fine-tune
+    # agent.save_memory(save_path="memory")
 
 if __name__ == "__main__":
     main()

@@ -77,7 +77,7 @@ class Reflexion_Oneshot(Reflexion):
                                 oneshot=input_mem["oneshot"],
                                 pass_call=input_mem["pass_call"],
                                 pass_exe=input_mem["pass_exe"],
-                                code=os_mem["code"]
+                                code=input_mem["code"]
                                 )
             self.memories.append(tmp_mem)
 
@@ -111,19 +111,18 @@ class Reflexion_Oneshot(Reflexion):
             To check for correctness against expected outputs, use the test_opt_correctness method from TritonBench:
             """
             if output_path is not None:
-                    root, extension = os.path.splitext(output_path)
-                    tmp_dir = f"{root}_tmp_{iter}"
-                    exe_dir = f"{root}_pass_exe_{iter}"
-                    perf_result_dir = f"{root}_perf_results_{iter}"
-                    perf_log_dir = f"{root}_perf_logs_{iter}"
+                root, extension = os.path.splitext(output_path)
+                tmp_dir = f"{root}_tmp_{iter}"
+                exe_dir = f"{root}_pass_exe_{iter}"
+                perf_result_dir = f"{root}_perf_results_{iter}"
+                perf_log_dir = f"{root}_perf_logs_{iter}"
 
             else:
-                    tmp_dir = f"tmp_{iter}"
-                    exe_dir = f"pass_exe_{iter}"
-                    perf_result_dir = f"perf_results_{iter}"
-                    perf_log_dir = f"perf_logs_{iter}"
+                tmp_dir = f"tmp_{iter}"
+                exe_dir = f"pass_exe_{iter}"
+                perf_result_dir = f"perf_results_{iter}"
+                perf_log_dir = f"perf_logs_{iter}"
 
-            #for fn, mems in tqdm(current_memories.items()):
             for mem in tqdm(self.memories[:data_len]):
                 if mem.pass_exe:
                     continue
@@ -149,8 +148,6 @@ class Reflexion_Oneshot(Reflexion):
             """
             To measure kernel latency, follow these steps:
             """
-            #self.dataset.write_perf_file(input_folder_path=exe_dir, results_path=perf_result_dir, tmp_dir=script_dir)
-            #self.dataset.run_perf_scripts(gpu_id=gpu_id, script_dir=script_dir, log_dir=perf_log_dir)
             self.dataset.write_perf_file(input_folder_path=exe_dir, results_path=perf_result_dir, tmp_dir=tmp_dir)
             self.dataset.run_perf_scripts(script_dir=tmp_dir, log_dir=perf_log_dir)
 
@@ -237,3 +234,16 @@ class Reflexion_Oneshot(Reflexion):
             }
         ]
         mem.reflection = self.model.generate(reflect_msg, temperature=temperature)
+
+    def save_memory(self, save_path="memory", datalen=None):
+        data_len = datalen if datalen else len(self.dataset)
+        for i, mem in enumerate(self.memories[:data_len]):
+            mem_dict = {}
+            mem_dict["err_msg"] = mem.err_msg
+            mem_dict["reflection"] = mem.reflection
+            mem_dict["function_signatures"] = mem.function_signatures
+            mem_dict["oneshot"] = mem.oneshot
+            mem_dict["pass_call"] = mem.pass_call
+            mem_dict["pass_exe"] = mem.pass_exe
+            mem_dict["code"] = mem.code
+            json.dump(f"{save_path}_file_{i}".json)
