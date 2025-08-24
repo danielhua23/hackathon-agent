@@ -8,6 +8,16 @@ import signal
 from multiprocessing import Pool, Lock, Value
 from dataloaders.ProblemState import ProblemState
 from dataloaders.TB_eval.utils import code_call_exec_success_allclose
+import copy
+from typing import List, Dict
+import json
+import subprocess
+from dataclasses import dataclass, field
+import pandas as pd
+from loguru import logger
+import glob
+import re
+import traceback
 
 
 
@@ -23,13 +33,34 @@ class TritonBench:
                  result_path=None,
                  target_kernels=None
                  ):
-        self.statis_path = statis_path
-        self.py_folder = py_folder
-        self.instruction_path = instruction_path
-        self.golden_metrics_folder = golden_metrics
+        
+        # --- Robust Path Correction at the Source ---
+        # The root cause of FileNotFoundError was that paths in the config YAML
+        # start with '/', causing os.path.join('/workspace', '/path/...') to
+        # incorrectly resolve to '/path/...'.
+        # This robust function ensures the correct absolute path is created
+        # by stripping any leading '/' before joining with the workspace root.
+        def create_absolute_path(relative_path):
+            if not relative_path:
+                return None
+            
+            # If the path is already a valid absolute path inside the container, use it directly.
+            if relative_path.startswith('/workspace/') and os.path.exists(relative_path):
+                return relative_path
+
+            # Otherwise, perform the correction logic for paths relative to the project root.
+            if relative_path.startswith('/'):
+                relative_path = relative_path[1:]
+            
+            return os.path.join("/workspace", relative_path)
+
+        self.statis_path = create_absolute_path(statis_path)
+        self.py_folder = create_absolute_path(py_folder)
+        self.instruction_path = create_absolute_path(instruction_path)
+        self.golden_metrics_folder = create_absolute_path(golden_metrics)
         self.py_interpreter = py_interpreter
-        self.perf_ref_folder = perf_ref_folder
-        self.perf_G_path = perf_G_path
+        self.perf_ref_folder = perf_ref_folder # This is often None, leave as is.
+        self.perf_G_path = create_absolute_path(perf_G_path)
         self.result_path = result_path
 
         self.problem_states = self.load_ps(result_path, target_kernels)
@@ -49,13 +80,20 @@ class TritonBench:
 
                 path = os.path.join(self.py_folder, file)
                 assert os.path.exists(path), f"{file} not exist!"
-                test_code = open(path, "r", encoding="utf-8").read().split("#"*146)[-1]
+                
+                # Read the full original file content as the "golden code"
+                with open(path, "r", encoding="utf-8") as f:
+                    golden_code_content = f.read()
+                
+                # The test code is the portion after the separator
+                test_code = golden_code_content.split("#"*146)[-1]
                 assert "def test_" in  test_code, ""
 
                 problemstate = ProblemState(instruction=instruction,
                                             label=label, 
                                             test_code=test_code, 
-                                            filename=file, 
+                                            filename=file,
+                                            golden_code=golden_code_content
                                             )
                 
                 problem_states.append(
@@ -291,6 +329,3 @@ class TritonBench:
                     f.write(code)
 
         return pass_call, pass_exe, call_stdout, call_stderr, exe_stdout, exe_stderr
-    
-    
-    

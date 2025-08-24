@@ -9,6 +9,7 @@ class ProblemState:
     test_code: Optional[str] = None
     instruction: Optional[str] = None
     solution: Optional[str] = None
+    golden_code: Optional[str] = None # To hold the full original source file
 
 @dataclass
 class ProblemStateROCm:
