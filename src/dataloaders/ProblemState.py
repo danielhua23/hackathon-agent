@@ -9,6 +9,7 @@ class ProblemState:
     test_code: Optional[str] = None
     instruction: Optional[str] = None
     solution: Optional[str] = None
+    ref_code: Optional[str] = None
 
 @dataclass
 class ProblemStateROCm:

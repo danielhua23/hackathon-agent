@@ -1,0 +1,6 @@
+{
+    "embedding_triton_kernel.json": {
+        "ms": 4.8564,
+        "efficiency": 67.5919
+    }
+}

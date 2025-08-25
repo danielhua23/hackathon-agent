@@ -22,6 +22,30 @@ on why the solution failed and how it could be improved. Be specific about the i
 
 """
 
+my_prompt = """
+You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
+on why the solution failed and how it could be improved. Be specific about the issues found.
+
+**Original problem:**
+
+{problem}
+
+**Attempted solution:**
+
+{solution}
+
+**Test results:**
+
+{test_result}
+
+**Important Instructions:**
+- Think before writing the reflection and no more explanation is required after the reflection.
+- You should not suggest changes to the name of the function.
+- generate the reflection wrapped in a code block with the tag `reflection`, e.g.
+"```markdown<your reflections>```"
+
+"""
+
 prompt_exe = """
 You are an expert in writing Triton operators for efficient GPU programming. Analyze the failed test cases and provide insights 
 on why the solution failed and how it could be improved. Be specific about the issues found.

@@ -2,8 +2,9 @@ import os
 from typing import List
 import openai
 from tenacity import retry, stop_after_attempt, wait_random_exponential
-
+from loguru import logger
 from models.Base import BaseModel
+
 
 
 class KimiK2Model(BaseModel):
@@ -35,6 +36,7 @@ class KimiK2Model(BaseModel):
                  presence_penalty=0, 
                  frequency_penalty=0, 
                  max_tokens=5000) -> str:
+        logger.debug(f"prompt: {messages}")
         response = self.client.chat.completions.create(
             model=self.model_id,
             messages=messages,
@@ -45,7 +47,7 @@ class KimiK2Model(BaseModel):
         
         if not response or not hasattr(response, 'choices') or len(response.choices) == 0:
             raise ValueError("No response choices returned from the API.")
-
+        logger.debug(f"response: {response.choices[0].message.content}")
         return response.choices[0].message.content
    
 

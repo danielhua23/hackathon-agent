@@ -1,7 +1,7 @@
 # LLM model
-api_key: ""
+api_key: "wisemodel-idfdnfgmekkildhlevxe"
 model_id: "Kimi-K2-Instruct"
-temperature: 1.0
+temperature: 0.2
 
 # TritonBench
 statis_path: "/hackathon-agent/src/dataloaders/TB_eval/data/TritonBench_G_comp_alpac_v1_hackathon.json"
@@ -21,9 +21,12 @@ py_interpreter: "python"
 # target_kernels: ["flash_decode2_phi.py", 'l2_norm_triton1.py', "int4_matmul.py", "sin_kernel.py", "triton_matmul.py", "l2_norm_bwd.py", "matrix_transpose.py", "embedding_triton_kernel.py", "rotary_transform.py", "matrix_vector_multip.py"]
 # you can specify which kernels you want to generate by setting target_kernels. null means all 10 kernels for hackathon.
 target_kernels: null
+# target_kernels: ["matrix_vector_multip.py"]
 
 # the path where results will be stored
-output_path: "/workspace/reflexion_oneshot_tritonbench.json"
+output_path: "/workspace/reflexion_oneshot_tritonbench_iter1.json"
+# output_path: "/workspace/reflexion_oneshot_tritonbench_matrix_vector_multip.json"
+# output_path: "/workspace/reflexion_oneshot_tritonbench_embedding.json"
 max_iteration: 5
 # set multi_thread to false if you want to debug the process
 multi_thread: true
